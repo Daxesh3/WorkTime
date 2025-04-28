@@ -1,6 +1,5 @@
 import React from 'react';
 import { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { FiClock, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 
 const TimePicker = ({
@@ -116,31 +115,23 @@ const TimePicker = ({
                 </div>
             </div>
 
-            <AnimatePresence>
-                {isOpen && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        transition={{ duration: 0.2 }}
-                        className='absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg border border-neutral-200 max-h-60 overflow-y-auto'
-                    >
-                        <div className='py-1'>
-                            {timeOptions.map((time) => (
-                                <div
-                                    key={time}
-                                    className={`px-4 py-2 text-sm cursor-pointer hover:bg-primary-50 ${
-                                        time === value ? 'bg-primary-100 text-primary-800 font-medium' : 'text-neutral-700'
-                                    }`}
-                                    onClick={() => handleSelectTime(time)}
-                                >
-                                    {time}
-                                </div>
-                            ))}
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+            {isOpen && (
+                <div className='animate-fade-in-down animate-duration-300absolute z-10 mt-1 w-full bg-white rounded-md shadow-lg border border-neutral-200 max-h-60 overflow-y-auto'>
+                    <div className='py-1'>
+                        {timeOptions.map((time) => (
+                            <div
+                                key={time}
+                                className={`px-4 py-2 text-sm cursor-pointer hover:bg-primary-50 ${
+                                    time === value ? 'bg-primary-100 text-primary-800 font-medium' : 'text-neutral-700'
+                                }`}
+                                onClick={() => handleSelectTime(time)}
+                            >
+                                {time}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { FiUsers, FiEdit2, FiTrash2, FiPlus, FiClock, FiCheck, FiX, FiCalendar } from 'react-icons/fi';
 import Card from '../components/ui/Card';
 import TimePicker from '../components/ui/TimePicker';
@@ -134,10 +133,10 @@ const EmployeeSchedule = () => {
 
     return (
         <div className='space-y-6 py-4'>
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+            <div className='animate-fade-in-down animate-duration-300'>
                 <h1 className='text-2xl font-semibold text-neutral-800'>Employee Schedule</h1>
                 <p className='text-neutral-500 mt-1'>View and manage daily working time records</p>
-            </motion.div>
+            </div>
 
             <Card
                 title='Date Selection'
@@ -191,179 +190,166 @@ const EmployeeSchedule = () => {
             </Card>
 
             {/* Form for adding/editing records */}
-            <AnimatePresence>
-                {(isAddingRecord || editingId) && (
-                    <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.2 }}
+            {(isAddingRecord || editingId) && (
+                <div className='animate-fade-in-down animate-duration-300'>
+                    <Card
+                        title={isAddingRecord ? 'Add New Record' : 'Edit Record'}
+                        icon={<FiEdit2 size={20} />}
+                        actionButton={
+                            <div className='flex space-x-2'>
+                                <button
+                                    className='btn btn-secondary'
+                                    onClick={() => {
+                                        setIsAddingRecord(false);
+                                        setEditingId(null);
+                                    }}
+                                >
+                                    <FiX /> Cancel
+                                </button>
+                                <button
+                                    className='btn btn-primary'
+                                    onClick={
+                                        isAddingRecord
+                                            ? handleAddRecord
+                                            : () => {
+                                                  calculateAllHours();
+                                                  setEditingId(null);
+                                              }
+                                    }
+                                >
+                                    <FiCheck /> {isAddingRecord ? 'Add' : 'Save'}
+                                </button>
+                            </div>
+                        }
                     >
-                        <Card
-                            title={isAddingRecord ? 'Add New Record' : 'Edit Record'}
-                            icon={<FiEdit2 size={20} />}
-                            actionButton={
-                                <div className='flex space-x-2'>
-                                    <button
-                                        className='btn btn-secondary'
-                                        onClick={() => {
-                                            setIsAddingRecord(false);
-                                            setEditingId(null);
-                                        }}
-                                    >
-                                        <FiX /> Cancel
-                                    </button>
-                                    <button
-                                        className='btn btn-primary'
-                                        onClick={
-                                            isAddingRecord
-                                                ? handleAddRecord
-                                                : () => {
-                                                      calculateAllHours();
-                                                      setEditingId(null);
-                                                  }
-                                        }
-                                    >
-                                        <FiCheck /> {isAddingRecord ? 'Add' : 'Save'}
-                                    </button>
-                                </div>
-                            }
-                        >
-                            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                                <div>
-                                    {isAddingRecord && (
-                                        <div className='mb-4'>
-                                            <label className='input-label'>Employee Name</label>
-                                            <input
-                                                type='text'
-                                                value={newRecord.name}
-                                                onChange={(e) => handleNewRecordChange('name', e.target.value)}
-                                                className='time-input w-full'
-                                                placeholder='Enter employee name'
-                                            />
-                                        </div>
-                                    )}
-
-                                    <div className='grid grid-cols-2 gap-4 mb-4'>
-                                        <div>
-                                            <TimePicker
-                                                label='Clock In'
-                                                value={isAddingRecord ? newRecord.clockIn : employeeRecords.find((r) => r.id === editingId)?.clockIn}
-                                                onChange={(value) =>
-                                                    isAddingRecord
-                                                        ? handleNewRecordChange('clockIn', value)
-                                                        : updateEmployeeRecord(editingId, { clockIn: value })
-                                                }
-                                            />
-                                        </div>
-                                        <div>
-                                            <TimePicker
-                                                label='Clock Out'
-                                                value={
-                                                    isAddingRecord ? newRecord.clockOut : employeeRecords.find((r) => r.id === editingId)?.clockOut
-                                                }
-                                                onChange={(value) =>
-                                                    isAddingRecord
-                                                        ? handleNewRecordChange('clockOut', value)
-                                                        : updateEmployeeRecord(editingId, { clockOut: value })
-                                                }
-                                            />
-                                        </div>
+                        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                            <div>
+                                {isAddingRecord && (
+                                    <div className='mb-4'>
+                                        <label className='input-label'>Employee Name</label>
+                                        <input
+                                            type='text'
+                                            value={newRecord.name}
+                                            onChange={(e) => handleNewRecordChange('name', e.target.value)}
+                                            className='time-input w-full'
+                                            placeholder='Enter employee name'
+                                        />
                                     </div>
+                                )}
 
-                                    <div className='grid grid-cols-2 gap-4 mb-6'>
-                                        <div>
-                                            <TimePicker
-                                                label='Lunch Start'
-                                                value={
-                                                    isAddingRecord
-                                                        ? newRecord.lunchStart
-                                                        : employeeRecords.find((r) => r.id === editingId)?.lunchStart
-                                                }
-                                                onChange={(value) => {
-                                                    if (isAddingRecord) {
-                                                        handleNewRecordChange('lunchStart', value);
-                                                    } else {
-                                                        const lunchEnd = calculateLunchEnd(value, parameters.lunchBreak.duration);
-                                                        updateEmployeeRecord(editingId, {
-                                                            lunchStart: value,
-                                                            lunchEnd,
-                                                        });
-                                                    }
-                                                }}
-                                                minTime={parameters.lunchBreak.flexWindowStart}
-                                                maxTime={parameters.lunchBreak.flexWindowEnd}
-                                            />
-                                        </div>
-                                        <div>
-                                            <TimePicker
-                                                label='Lunch End'
-                                                value={
-                                                    isAddingRecord ? newRecord.lunchEnd : employeeRecords.find((r) => r.id === editingId)?.lunchEnd
-                                                }
-                                                onChange={(value) =>
-                                                    isAddingRecord
-                                                        ? handleNewRecordChange('lunchEnd', value)
-                                                        : updateEmployeeRecord(editingId, { lunchEnd: value })
-                                                }
-                                                minTime={parameters.lunchBreak.flexWindowStart}
-                                                maxTime={parameters.lunchBreak.flexWindowEnd}
-                                            />
-                                        </div>
+                                <div className='grid grid-cols-2 gap-4 mb-4'>
+                                    <div>
+                                        <TimePicker
+                                            label='Clock In'
+                                            value={isAddingRecord ? newRecord.clockIn : employeeRecords.find((r) => r.id === editingId)?.clockIn}
+                                            onChange={(value) =>
+                                                isAddingRecord
+                                                    ? handleNewRecordChange('clockIn', value)
+                                                    : updateEmployeeRecord(editingId, { clockIn: value })
+                                            }
+                                        />
+                                    </div>
+                                    <div>
+                                        <TimePicker
+                                            label='Clock Out'
+                                            value={isAddingRecord ? newRecord.clockOut : employeeRecords.find((r) => r.id === editingId)?.clockOut}
+                                            onChange={(value) =>
+                                                isAddingRecord
+                                                    ? handleNewRecordChange('clockOut', value)
+                                                    : updateEmployeeRecord(editingId, { clockOut: value })
+                                            }
+                                        />
                                     </div>
                                 </div>
 
-                                <div>
-                                    <div className='flex items-center justify-between mb-4'>
-                                        <label className='input-label'>Additional Breaks</label>
-                                        <button
-                                            type='button'
-                                            className='text-sm text-primary-600 hover:text-primary-800 flex items-center'
-                                            onClick={() => handleAddBreak(isAddingRecord)}
-                                        >
-                                            <FiPlus className='mr-1' /> Add Break
-                                        </button>
+                                <div className='grid grid-cols-2 gap-4 mb-6'>
+                                    <div>
+                                        <TimePicker
+                                            label='Lunch Start'
+                                            value={
+                                                isAddingRecord ? newRecord.lunchStart : employeeRecords.find((r) => r.id === editingId)?.lunchStart
+                                            }
+                                            onChange={(value) => {
+                                                if (isAddingRecord) {
+                                                    handleNewRecordChange('lunchStart', value);
+                                                } else {
+                                                    const lunchEnd = calculateLunchEnd(value, parameters.lunchBreak.duration);
+                                                    updateEmployeeRecord(editingId, {
+                                                        lunchStart: value,
+                                                        lunchEnd,
+                                                    });
+                                                }
+                                            }}
+                                            minTime={parameters.lunchBreak.flexWindowStart}
+                                            maxTime={parameters.lunchBreak.flexWindowEnd}
+                                        />
                                     </div>
-
-                                    {/* Break list */}
-                                    <div className='space-y-3'>
-                                        {(isAddingRecord ? newRecord.breaks : employeeRecords.find((r) => r.id === editingId)?.breaks || []).map(
-                                            (breakItem, index) => (
-                                                <div
-                                                    key={index}
-                                                    className='flex items-center space-x-2 p-2 border border-neutral-200 rounded-lg bg-neutral-50'
-                                                >
-                                                    <TimePicker
-                                                        value={breakItem.start}
-                                                        onChange={(value) => handleUpdateBreakTime(index, 'start', value, isAddingRecord)}
-                                                        className='w-24 text-sm'
-                                                    />
-                                                    <span className='text-neutral-400'>to</span>
-                                                    <TimePicker
-                                                        value={breakItem.end}
-                                                        onChange={(value) => handleUpdateBreakTime(index, 'end', value, isAddingRecord)}
-                                                        className='w-24 text-sm'
-                                                    />
-                                                    <button
-                                                        type='button'
-                                                        className='text-error-500 hover:text-error-700 ml-auto'
-                                                        onClick={() => handleRemoveBreak(index, isAddingRecord)}
-                                                    >
-                                                        <FiTrash2 />
-                                                    </button>
-                                                </div>
-                                            )
-                                        )}
-
-                                        {(isAddingRecord ? newRecord.breaks : employeeRecords.find((r) => r.id === editingId)?.breaks || [])
-                                            .length === 0 && <div className='text-sm text-neutral-500 italic p-2'>No additional breaks added</div>}
+                                    <div>
+                                        <TimePicker
+                                            label='Lunch End'
+                                            value={isAddingRecord ? newRecord.lunchEnd : employeeRecords.find((r) => r.id === editingId)?.lunchEnd}
+                                            onChange={(value) =>
+                                                isAddingRecord
+                                                    ? handleNewRecordChange('lunchEnd', value)
+                                                    : updateEmployeeRecord(editingId, { lunchEnd: value })
+                                            }
+                                            minTime={parameters.lunchBreak.flexWindowStart}
+                                            maxTime={parameters.lunchBreak.flexWindowEnd}
+                                        />
                                     </div>
                                 </div>
                             </div>
-                        </Card>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+
+                            <div>
+                                <div className='flex items-center justify-between mb-4'>
+                                    <label className='input-label'>Additional Breaks</label>
+                                    <button
+                                        type='button'
+                                        className='text-sm text-primary-600 hover:text-primary-800 flex items-center'
+                                        onClick={() => handleAddBreak(isAddingRecord)}
+                                    >
+                                        <FiPlus className='mr-1' /> Add Break
+                                    </button>
+                                </div>
+
+                                {/* Break list */}
+                                <div className='space-y-3'>
+                                    {(isAddingRecord ? newRecord.breaks : employeeRecords.find((r) => r.id === editingId)?.breaks || []).map(
+                                        (breakItem, index) => (
+                                            <div
+                                                key={index}
+                                                className='flex items-center space-x-2 p-2 border border-neutral-200 rounded-lg bg-neutral-50'
+                                            >
+                                                <TimePicker
+                                                    value={breakItem.start}
+                                                    onChange={(value) => handleUpdateBreakTime(index, 'start', value, isAddingRecord)}
+                                                    className='w-24 text-sm'
+                                                />
+                                                <span className='text-neutral-400'>to</span>
+                                                <TimePicker
+                                                    value={breakItem.end}
+                                                    onChange={(value) => handleUpdateBreakTime(index, 'end', value, isAddingRecord)}
+                                                    className='w-24 text-sm'
+                                                />
+                                                <button
+                                                    type='button'
+                                                    className='text-error-500 hover:text-error-700 ml-auto'
+                                                    onClick={() => handleRemoveBreak(index, isAddingRecord)}
+                                                >
+                                                    <FiTrash2 />
+                                                </button>
+                                            </div>
+                                        )
+                                    )}
+
+                                    {(isAddingRecord ? newRecord.breaks : employeeRecords.find((r) => r.id === editingId)?.breaks || []).length ===
+                                        0 && <div className='text-sm text-neutral-500 italic p-2'>No additional breaks added</div>}
+                                </div>
+                            </div>
+                        </div>
+                    </Card>
+                </div>
+            )}
 
             {/* Employee Records Table */}
             <Card title='Time Records' subtitle={`${format(selectedDate, 'MMMM d, yyyy')}`} icon={<FiUsers size={20} />} className='animate-fade-in'>

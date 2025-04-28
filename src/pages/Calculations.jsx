@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { FiClock, FiPieChart, FiAlertCircle, FiXCircle, FiCheckCircle, FiBarChart2 } from 'react-icons/fi';
+import { FaClock, FaChartPie, FaExclamationCircle, FaTimesCircle, FaCheckCircle, FaChartBar } from 'react-icons/fa';
 import Card from '../components/ui/Card';
 import TimePicker from '../components/ui/TimePicker';
 import useWorkTimeStore from '../store/workTimeStore';
+import useCompanyStore from '../store/companyStore';
 import { useLocation } from 'react-router-dom';
 
 const Calculations = () => {
     const location = useLocation();
-    const { parameters, simulateCalculation } = useWorkTimeStore();
+    const { simulateCalculation } = useWorkTimeStore();
+    const { companies, currentCompanyId, getCurrentParameters } = useCompanyStore();
 
     // Sample record for simulation
     const [simulationRecord, setSimulationRecord] = useState({
@@ -22,19 +23,26 @@ const Calculations = () => {
     // Keep calculation result in state
     const [calculationResult, setCalculationResult] = useState(null);
 
+    // Get current parameters
+    const parameters = getCurrentParameters();
+
     // Initialize with pre-filled data if available
     useEffect(() => {
         if (location.state?.record) {
             setSimulationRecord(location.state.record);
-            const result = simulateCalculation(location.state.record);
-            setCalculationResult(result);
+            if (parameters) {
+                const result = simulateCalculation(location.state.record, parameters);
+                setCalculationResult(result);
+            }
         }
-    }, [location.state]);
+    }, [location.state, parameters]);
 
     // Run calculation simulation
     const runCalculation = () => {
-        const result = simulateCalculation(simulationRecord);
-        setCalculationResult(result);
+        if (parameters) {
+            const result = simulateCalculation(simulationRecord, parameters);
+            setCalculationResult(result);
+        }
     };
 
     // Handle updating simulation record fields
@@ -87,21 +95,32 @@ const Calculations = () => {
 
     // Get status icon
     const getStatusIcon = (status) => {
-        return status ? <FiCheckCircle className='inline-block mr-1' /> : <FiXCircle className='inline-block mr-1' />;
+        return status ? <FaCheckCircle className='inline-block mr-1' /> : <FaTimesCircle className='inline-block mr-1' />;
     };
+
+    if (!parameters) {
+        return (
+            <div className='space-y-6 py-4'>
+                <div className='animate-fade-in-down animate-duration-300'>
+                    <h1 className='text-2xl font-semibold text-neutral-800'>Working Time Calculator</h1>
+                    <p className='text-neutral-500 mt-1'>Please select a company first</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className='space-y-6 py-4'>
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+            <div className='animate-fade-in-down animate-duration-300'>
                 <h1 className='text-2xl font-semibold text-neutral-800'>Working Time Calculator</h1>
                 <p className='text-neutral-500 mt-1'>Simulate working time calculations based on your settings</p>
-            </motion.div>
+            </div>
 
             <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
                 <div className='lg:col-span-2'>
                     <Card
                         title='Simulation Parameters'
-                        icon={<FiClock size={20} />}
+                        icon={<FaClock size={20} />}
                         className='animate-fade-in h-full'
                         actionButton={
                             <button className='btn btn-primary' onClick={runCalculation}>
@@ -240,7 +259,7 @@ const Calculations = () => {
 
                                 <div className='mt-4 p-3 bg-primary-50 border border-primary-100 rounded-lg text-sm text-primary-700'>
                                     <div className='flex items-start'>
-                                        <FiAlertCircle className='mt-0.5 mr-2 flex-shrink-0' />
+                                        <FaExclamationCircle className='mt-0.5 mr-2 flex-shrink-0' />
                                         <div>
                                             <p className='font-medium mb-1'>Simulation Tips:</p>
                                             <ul className='list-disc list-inside space-y-1'>
@@ -257,7 +276,7 @@ const Calculations = () => {
                 </div>
 
                 <div>
-                    <Card title='Calculation Results' icon={<FiPieChart size={20} />} className='animate-fade-in h-full'>
+                    <Card title='Calculation Results' icon={<FaChartPie size={20} />} className='animate-fade-in h-full'>
                         {calculationResult ? (
                             <div className='space-y-4'>
                                 <div className='p-3 bg-primary-50 rounded-lg'>
@@ -327,7 +346,7 @@ const Calculations = () => {
 
                                         {calculationResult.earlyArrival && (
                                             <div className='text-primary-600'>
-                                                <FiAlertCircle className='inline-block mr-1' />
+                                                <FaExclamationCircle className='inline-block mr-1' />
                                                 Early by {calculationResult.earlyArrivalMinutes} min
                                                 {parameters.earlyArrival.countTowardsTotal ? ' (counted)' : ' (not counted)'}
                                             </div>
@@ -335,21 +354,21 @@ const Calculations = () => {
 
                                         {calculationResult.lateArrival && (
                                             <div className='text-warning-600'>
-                                                <FiAlertCircle className='inline-block mr-1' />
+                                                <FaExclamationCircle className='inline-block mr-1' />
                                                 Late by {calculationResult.lateArrivalMinutes} min
                                             </div>
                                         )}
 
                                         {calculationResult.earlyDeparture && (
                                             <div className='text-warning-600'>
-                                                <FiAlertCircle className='inline-block mr-1' />
+                                                <FaExclamationCircle className='inline-block mr-1' />
                                                 Left early by {calculationResult.earlyDepartureMinutes} min
                                             </div>
                                         )}
 
                                         {calculationResult.lateDeparture && (
                                             <div className='text-primary-600'>
-                                                <FiAlertCircle className='inline-block mr-1' />
+                                                <FaExclamationCircle className='inline-block mr-1' />
                                                 Stayed late by {calculationResult.lateDepartureMinutes} min
                                                 {calculationResult.overtimeHours > 0
                                                     ? ' (includes overtime)'
@@ -418,7 +437,7 @@ const Calculations = () => {
                             </div>
                         ) : (
                             <div className='text-center py-8'>
-                                <FiBarChart2 className='mx-auto text-neutral-300 text-4xl mb-3' />
+                                <FaChartBar className='mx-auto text-neutral-300 text-4xl mb-3' />
                                 <p className='text-neutral-500'>Click "Calculate" to see results</p>
                                 <button className='btn btn-primary mt-4' onClick={runCalculation}>
                                     Run Calculation
