@@ -1,25 +1,26 @@
 import React, { useState } from 'react';
-import { FiClock, FiCoffee, FiSun, FiSunset, FiAlertCircle } from 'react-icons/fi';
+import { FiClock, FiCoffee, FiSun, FiAlertCircle } from 'react-icons/fi';
 import TimePicker from '../components/ui/TimePicker';
 import TimeSlider from '../components/ui/TimeSlider';
 import Card from '../components/ui/Card';
 import useWorkTimeStore from '../store/workTimeStore';
+import { CompanyParameters } from '../shared/types';
 
-const ParameterSettings = () => {
+const ParameterSettings: React.FC = () => {
     const { parameters, updateParameters } = useWorkTimeStore();
 
     // Create local state to manage form values
-    const [localParams, setLocalParams] = useState({ ...parameters });
+    const [localParams, setLocalParams] = useState<CompanyParameters>({ ...parameters });
 
     // Handle numeric input changes
-    const handleNumberChange = (path, value) => {
+    const handleNumberChange = (path: string, value: number) => {
         const newParams = { ...localParams };
 
         // Split the path into parts (e.g., "lunchBreak.duration" -> ["lunchBreak", "duration"])
         const pathParts = path.split('.');
 
         // Navigate to the right part of the object
-        let current = newParams;
+        let current: any = newParams;
         for (let i = 0; i < pathParts.length - 1; i++) {
             current = current[pathParts[i]];
         }
@@ -32,11 +33,11 @@ const ParameterSettings = () => {
     };
 
     // Handle time input changes
-    const handleTimeChange = (path, value) => {
+    const handleTimeChange = (path: string, value: string) => {
         const newParams = { ...localParams };
 
         const pathParts = path.split('.');
-        let current = newParams;
+        let current: any = newParams;
         for (let i = 0; i < pathParts.length - 1; i++) {
             current = current[pathParts[i]];
         }
@@ -48,11 +49,11 @@ const ParameterSettings = () => {
     };
 
     // Handle checkbox changes
-    const handleCheckboxChange = (path, checked) => {
+    const handleCheckboxChange = (path: string, checked: boolean) => {
         const newParams = { ...localParams };
 
         const pathParts = path.split('.');
-        let current = newParams;
+        let current: any = newParams;
         for (let i = 0; i < pathParts.length - 1; i++) {
             current = current[pathParts[i]];
         }
@@ -64,7 +65,7 @@ const ParameterSettings = () => {
     };
 
     // Handle lunch break window changes
-    const handleLunchWindowChange = ([start, end]) => {
+    const handleLunchWindowChange = ([start, end]: [string, string]) => {
         const newParams = { ...localParams };
         newParams.lunchBreak.flexWindowStart = start;
         newParams.lunchBreak.flexWindowEnd = end;
@@ -229,136 +230,6 @@ const ParameterSettings = () => {
                     </div>
                 </div>
             </Card>
-
-            {/* Other Breaks Card */}
-            <Card title='Additional Breaks' icon={<FiCoffee size={20} />} className='animate-fade-in'>
-                <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                    <div>
-                        <div className='flex items-center mb-4'>
-                            <input
-                                type='checkbox'
-                                id='morning-break'
-                                checked={localParams.breaks.morning.enabled}
-                                onChange={(e) => handleCheckboxChange('breaks.morning.enabled', e.target.checked)}
-                                className='h-4 w-4 text-primary-600 focus:ring-primary-500 border-neutral-300 rounded'
-                            />
-                            <label htmlFor='morning-break' className='ml-2 block text-sm font-medium text-neutral-700'>
-                                Enable Morning Break
-                            </label>
-                        </div>
-
-                        {localParams.breaks.morning.enabled && (
-                            <div className='animate-fade-in-down animate-duration-300 ml-6 mb-4 space-y-4'>
-                                <div>
-                                    <label className='input-label'>Duration</label>
-                                    <div className='flex items-center'>
-                                        <input
-                                            type='number'
-                                            min='5'
-                                            max='30'
-                                            step='5'
-                                            value={localParams.breaks.morning.duration}
-                                            onChange={(e) => handleNumberChange('breaks.morning.duration', parseInt(e.target.value))}
-                                            className='time-input w-24'
-                                        />
-                                        <span className='ml-2 text-neutral-600'>minutes</span>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <TimePicker
-                                        label='Default Time'
-                                        value={localParams.breaks.morning.defaultTime}
-                                        onChange={(value) => handleTimeChange('breaks.morning.defaultTime', value)}
-                                    />
-                                </div>
-                            </div>
-                        )}
-
-                        <div className='flex items-center mb-4 mt-6'>
-                            <input
-                                type='checkbox'
-                                id='afternoon-break'
-                                checked={localParams.breaks.afternoon.enabled}
-                                onChange={(e) => handleCheckboxChange('breaks.afternoon.enabled', e.target.checked)}
-                                className='h-4 w-4 text-primary-600 focus:ring-primary-500 border-neutral-300 rounded'
-                            />
-                            <label htmlFor='afternoon-break' className='ml-2 block text-sm font-medium text-neutral-700'>
-                                Enable Afternoon Break
-                            </label>
-                        </div>
-
-                        {localParams.breaks.afternoon.enabled && (
-                            <div className='animate-fade-in-down animate-duration-300 ml-6 space-y-4'>
-                                <div>
-                                    <label className='input-label'>Duration</label>
-                                    <div className='flex items-center'>
-                                        <input
-                                            type='number'
-                                            min='5'
-                                            max='30'
-                                            step='5'
-                                            value={localParams.breaks.afternoon.duration}
-                                            onChange={(e) => handleNumberChange('breaks.afternoon.duration', parseInt(e.target.value))}
-                                            className='time-input w-24'
-                                        />
-                                        <span className='ml-2 text-neutral-600'>minutes</span>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <TimePicker
-                                        label='Default Time'
-                                        value={localParams.breaks.afternoon.defaultTime}
-                                        onChange={(value) => handleTimeChange('breaks.afternoon.defaultTime', value)}
-                                    />
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className='bg-neutral-50 p-4 rounded-lg'>
-                        <div className='text-sm text-neutral-600'>
-                            <div className='flex items-center mb-2'>
-                                <FiAlertCircle className='text-primary-500 mr-2' />
-                                <span className='font-medium'>Break Summary</span>
-                            </div>
-
-                            {localParams.breaks.morning.enabled ? (
-                                <p>
-                                    Morning break: <span className='font-medium'>{localParams.breaks.morning.duration} minutes</span> at{' '}
-                                    <span className='font-medium'>{localParams.breaks.morning.defaultTime}</span>
-                                </p>
-                            ) : (
-                                <p>
-                                    Morning break: <span className='text-neutral-400'>Disabled</span>
-                                </p>
-                            )}
-
-                            {localParams.breaks.afternoon.enabled ? (
-                                <p>
-                                    Afternoon break: <span className='font-medium'>{localParams.breaks.afternoon.duration} minutes</span> at{' '}
-                                    <span className='font-medium'>{localParams.breaks.afternoon.defaultTime}</span>
-                                </p>
-                            ) : (
-                                <p>
-                                    Afternoon break: <span className='text-neutral-400'>Disabled</span>
-                                </p>
-                            )}
-
-                            <p className='mt-2'>
-                                Total daily break time:{' '}
-                                <span className='font-medium'>
-                                    {(localParams.breaks.morning.enabled ? localParams.breaks.morning.duration : 0) +
-                                        (localParams.breaks.afternoon.enabled ? localParams.breaks.afternoon.duration : 0)}{' '}
-                                    minutes
-                                </span>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </Card>
-
             {/* Early Arrival and Late Stay Card */}
             <Card title='Early Arrival & Late Stay Policies' icon={<FiSun size={20} />} className='animate-fade-in'>
                 <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>

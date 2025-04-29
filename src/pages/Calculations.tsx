@@ -1,18 +1,57 @@
 import React, { useState, useEffect } from 'react';
-import { FaClock, FaChartPie, FaExclamationCircle, FaTimesCircle, FaCheckCircle, FaChartBar } from 'react-icons/fa';
-import Card from '../components/ui/Card';
-import TimePicker from '../components/ui/TimePicker';
-import useWorkTimeStore from '../store/workTimeStore';
-import useCompanyStore from '../store/companyStore';
 import { useLocation } from 'react-router-dom';
 
-const Calculations = () => {
+import { FaChartBar, FaChartPie, FaCheckCircle, FaClock, FaExclamationCircle, FaTimesCircle } from 'react-icons/fa';
+import Card from '../components/ui/Card';
+import useWorkTimeStore from '../store/workTimeStore';
+import TimePicker from '../components/ui/TimePicker';
+import useCompanyStore from '../store/companyStore';
+import { CompanyParameters, Parameters } from '../shared/types';
+
+// Types for simulation record and calculation result
+interface Break {
+    start: string;
+    end: string;
+}
+
+interface SimulationRecord {
+    clockIn: string;
+    clockOut: string;
+    lunchStart: string;
+    lunchEnd: string;
+    breaks: Break[];
+}
+
+interface CalculationResult {
+    effectiveStart: string;
+    effectiveEnd: string;
+    totalWorkingMinutes: number;
+    regularHours: number;
+    overtimeHours: number;
+    overtimePay: number;
+    totalEffectiveHours: number;
+    lunchDuration: number;
+    otherBreaksDuration: number;
+    isLunchBreakInWindow: boolean;
+    isLunchBreakCorrectDuration: boolean;
+    earlyArrival: boolean;
+    earlyArrivalMinutes: number;
+    lateArrival: boolean;
+    lateArrivalMinutes: number;
+    earlyDeparture: boolean;
+    earlyDepartureMinutes: number;
+    lateDeparture: boolean;
+    lateDepartureMinutes: number;
+    // ... add any other fields your simulateCalculation returns
+}
+
+const Calculations: React.FC = () => {
     const location = useLocation();
     const { simulateCalculation } = useWorkTimeStore();
-    const { companies, currentCompanyId, getCurrentParameters } = useCompanyStore();
+    const { getCurrentParameters } = useCompanyStore();
 
     // Sample record for simulation
-    const [simulationRecord, setSimulationRecord] = useState({
+    const [simulationRecord, setSimulationRecord] = useState<SimulationRecord>({
         clockIn: '07:49',
         clockOut: '16:06',
         lunchStart: '11:45',
@@ -21,21 +60,19 @@ const Calculations = () => {
     });
 
     // Keep calculation result in state
-    const [calculationResult, setCalculationResult] = useState(null);
+    const [calculationResult, setCalculationResult] = useState<CalculationResult | null>(null);
 
     // Get current parameters
-    const parameters = getCurrentParameters();
+    const parameters: CompanyParameters = getCurrentParameters();
 
     // Initialize with pre-filled data if available
     useEffect(() => {
-        if (location.state?.record) {
+        if (location.state?.record && parameters) {
             setSimulationRecord(location.state.record);
-            if (parameters) {
-                const result = simulateCalculation(location.state.record, parameters);
-                setCalculationResult(result);
-            }
+            const result = simulateCalculation(location.state.record, parameters);
+            setCalculationResult(result);
         }
-    }, [location.state, parameters]);
+    }, [location.state, parameters, simulateCalculation]);
 
     // Run calculation simulation
     const runCalculation = () => {
@@ -46,7 +83,7 @@ const Calculations = () => {
     };
 
     // Handle updating simulation record fields
-    const handleFieldChange = (field, value) => {
+    const handleFieldChange = (field: keyof SimulationRecord, value: string) => {
         setSimulationRecord((prev) => ({
             ...prev,
             [field]: value,
@@ -54,7 +91,7 @@ const Calculations = () => {
     };
 
     // Handle updating break times
-    const handleBreakChange = (index, field, value) => {
+    const handleBreakChange = (index: number, field: keyof Break, value: string) => {
         setSimulationRecord((prev) => {
             const newBreaks = [...prev.breaks];
             newBreaks[index] = { ...newBreaks[index], [field]: value };
@@ -71,7 +108,7 @@ const Calculations = () => {
     };
 
     // Handle removing a break
-    const handleRemoveBreak = (index) => {
+    const handleRemoveBreak = (index: number) => {
         setSimulationRecord((prev) => ({
             ...prev,
             breaks: prev.breaks.filter((_, i) => i !== index),
@@ -79,7 +116,7 @@ const Calculations = () => {
     };
 
     // Format break time as string
-    const formatBreakTime = (minutes) => {
+    const formatBreakTime = (minutes: number) => {
         if (minutes < 60) {
             return `${minutes} min`;
         }
@@ -89,12 +126,12 @@ const Calculations = () => {
     };
 
     // Get status color
-    const getStatusColor = (status) => {
+    const getStatusColor = (status: boolean) => {
         return status ? 'text-success-600' : 'text-error-600';
     };
 
     // Get status icon
-    const getStatusIcon = (status) => {
+    const getStatusIcon = (status: boolean) => {
         return status ? <FaCheckCircle className='inline-block mr-1' /> : <FaTimesCircle className='inline-block mr-1' />;
     };
 

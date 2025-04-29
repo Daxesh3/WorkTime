@@ -1,8 +1,8 @@
-import React from 'react';
+import { FC } from 'react';
 import { Link } from 'react-router-dom';
 import { FiHome, FiClock } from 'react-icons/fi';
 
-const NotFound = () => {
+const NotFound: FC = () => {
     return (
         <div className='animate-fade-in-down animate-duration-300 flex flex-col items-center justify-center h-[calc(100vh-200px)]'>
             <FiClock className='text-primary-500 text-6xl mb-4' />

@@ -1,21 +1,34 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { FiSettings, FiClock, FiCalendar, FiMenu, FiX } from 'react-icons/fi';
+import { MdOutlineFactory } from 'react-icons/md';
+
 import useCompanyStore from '../../store/companyStore';
 
-const Layout = () => {
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+interface Company {
+    name: string;
+    [key: string]: any;
+}
+
+interface NavItem {
+    name: string;
+    path: string;
+    icon: React.ReactNode;
+}
+
+const Layout: FC = () => {
+    const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
     const location = useLocation();
     const { getCurrentCompany } = useCompanyStore();
-    const currentCompany = getCurrentCompany();
+    const currentCompany: Company | undefined = getCurrentCompany();
 
     // Close mobile menu when location changes
     useEffect(() => {
         setMobileMenuOpen(false);
     }, [location]);
 
-    const navItems = [
+    const navItems: NavItem[] = [
+        { name: 'Companies', path: '/companies', icon: <MdOutlineFactory /> },
         { name: 'Parameters', path: '/parameters', icon: <FiSettings /> },
         { name: 'Schedule', path: '/schedule', icon: <FiCalendar /> },
         { name: 'Calculations', path: '/calculations', icon: <FiClock /> },
@@ -56,7 +69,7 @@ const Layout = () => {
                         {/* Mobile menu button */}
                         <div className='md:hidden'>
                             <button
-                                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                                onClick={() => setMobileMenuOpen((open) => !open)}
                                 className='inline-flex items-center justify-center p-2 rounded-md text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500'
                             >
                                 <span className='sr-only'>Open main menu</span>

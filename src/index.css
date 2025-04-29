@@ -29,11 +29,11 @@ body {
 }
 
 .time-input {
-    @apply px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all;
+    @apply px-2 py-1 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all;
 }
 
 .btn {
-    @apply px-4 py-2 rounded-md font-medium transition-all duration-200 flex items-center justify-center gap-2;
+    @apply px-2 py-1 rounded-md font-medium transition-all duration-200 flex items-center justify-center gap-2;
 }
 
 .btn-primary {
