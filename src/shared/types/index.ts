@@ -40,10 +40,17 @@ export interface CompanyParameters {
     lateStay: LateStay;
 }
 
+export interface ShiftTiming {
+    name: 'morning' | 'evening' | 'night' | 'regular';
+    start: string; // e.g. "08:00"
+    end: string; // e.g. "16:00"
+}
+
 export interface Company {
     id: string;
     name: string;
     parameters: CompanyParameters;
+    shifts: ShiftTiming[];
     createdAt: Date;
     updatedAt: Date;
 }

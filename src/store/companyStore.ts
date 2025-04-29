@@ -26,6 +26,7 @@ const useCompanyStore = create<CompanyStore>()(
                 const newCompany: Company = {
                     id: Date.now().toString(),
                     name: company.name,
+                    shifts: company.shifts || [],
                     parameters: company.parameters,
                     createdAt: new Date(),
                     updatedAt: new Date(),

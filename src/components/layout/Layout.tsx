@@ -29,7 +29,7 @@ const Layout: FC = () => {
 
     const navItems: NavItem[] = [
         { name: 'Companies', path: '/companies', icon: <MdOutlineFactory /> },
-        { name: 'Parameters', path: '/parameters', icon: <FiSettings /> },
+        // { name: 'Parameters', path: '/parameters', icon: <FiSettings /> },
         { name: 'Schedule', path: '/schedule', icon: <FiCalendar /> },
         { name: 'Calculations', path: '/calculations', icon: <FiClock /> },
     ];
