@@ -1,20 +1,54 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { FiCheck, FiEdit2, FiPlus, FiTrash2, FiX } from 'react-icons/fi';
+import { format } from 'date-fns';
 
-import { CompanyParameters, EmployeeRecord } from '../../shared/types';
+import { Break, CompanyParameters, EmployeeRecord } from '../../shared/types';
 import Modal from '../../components/ui/Modal';
 import Card from '../../components/ui/Card';
 import TimePicker from '../../components/ui/TimePicker';
+import useCompanyStore from '../../store/companyStore';
+import useWorkTimeStore from '../../store/workTimeStore';
 
 interface AddEditEmployeeProps {
+    editingId: string | null;
     isOpen: boolean;
     isAddingRecord: boolean;
     onClose: () => void;
-    onSave: () => void;
-    newRecord: EmployeeRecord;
 }
 
-const AddEditEmployee: React.FC<AddEditEmployeeProps> = ({ isOpen, isAddingRecord, newRecord, setNewRecord, onClose, onSave }) => {
+const AddEditEmployee: React.FC<AddEditEmployeeProps> = ({ isOpen, editingId: editId, isAddingRecord, onClose }) => {
+    const { getCurrentParameters } = useCompanyStore();
+    const parameters: CompanyParameters = getCurrentParameters();
+    const { employeeRecords, addEmployeeRecord, updateEmployeeRecord } = useWorkTimeStore();
+    const [editingId, setEditingId] = useState<string | null>(editId);
+
+    const calculateLunchEnd = (startTime: string, durationMinutes: number) => {
+        const [hours, minutes] = startTime.split(':').map(Number);
+        const startDate = new Date();
+        startDate.setHours(hours, minutes, 0, 0);
+
+        const endDate = new Date(startDate.getTime() + durationMinutes * 60000);
+        const endHours = endDate.getHours().toString().padStart(2, '0');
+        const endMinutes = endDate.getMinutes().toString().padStart(2, '0');
+
+        return `${endHours}:${endMinutes}`;
+    };
+
+    const newRecordObj = useMemo(() => {
+        return {
+            id: '',
+            name: '',
+            date: format(new Date(), 'yyyy-MM-dd'),
+            clockIn: parameters.workingHours.start,
+            clockOut: parameters.workingHours.end,
+            lunchStart: parameters.lunchBreak.defaultStart,
+            lunchEnd: calculateLunchEnd(parameters.lunchBreak.defaultStart, parameters.lunchBreak.duration),
+            breaks: [],
+            calculatedHours: 0,
+        };
+    }, [parameters]);
+    const [newRecord, setNewRecord] = useState<EmployeeRecord>(newRecordObj);
+
     const handleNewRecordChange = (field: keyof EmployeeRecord, value: any) => {
         setNewRecord((prev) => ({ ...prev, [field]: value }));
 
@@ -23,6 +57,69 @@ const AddEditEmployee: React.FC<AddEditEmployeeProps> = ({ isOpen, isAddingRecor
             const lunchEnd = calculateLunchEnd(value, parameters.lunchBreak.duration);
             setNewRecord((prev) => ({ ...prev, lunchEnd }));
         }
+    };
+
+    // Handle adding a break to a new or existing record
+    const handleAddBreak = (isNewRecord: boolean) => {
+        const initTime = '10:00';
+        const duration = 15;
+        if (isNewRecord) {
+            const breakEndTime = calculateLunchEnd(initTime, duration);
+            setNewRecord((prev) => ({
+                ...prev,
+                breaks: [...prev.breaks, { start: initTime, end: breakEndTime } as Break],
+            }));
+        } else {
+            const record = employeeRecords.find((r) => r.id === editingId);
+            if (record) {
+                const breakEndTime = calculateLunchEnd(initTime, duration);
+                updateEmployeeRecord(editingId!, {
+                    ...record,
+                    breaks: [...record.breaks, { start: initTime, end: breakEndTime } as Break],
+                });
+            }
+        }
+    };
+
+    const handleRemoveBreak = (index: number, isNewRecord: boolean) => {
+        if (isNewRecord) {
+            setNewRecord((prev) => ({
+                ...prev,
+                breaks: prev.breaks.filter((_, i) => i !== index),
+            }));
+        } else {
+            const record = employeeRecords.find((r) => r.id === editingId);
+            if (record) {
+                updateEmployeeRecord(editingId!, {
+                    ...record,
+                    breaks: record.breaks.filter((_, i) => i !== index),
+                });
+            }
+        }
+    };
+
+    // Handle updating a break time
+    const handleUpdateBreakTime = (index: number, field: keyof Break, value: string, isNewRecord: boolean) => {
+        if (isNewRecord) {
+            setNewRecord((prev) => {
+                const newBreaks = [...prev.breaks];
+                newBreaks[index] = { ...newBreaks[index], [field]: value };
+                return { ...prev, breaks: newBreaks };
+            });
+        } else {
+            const record = employeeRecords.find((r) => r.id === editingId);
+            if (record) {
+                const newBreaks = [...record.breaks];
+                newBreaks[index] = { ...newBreaks[index], [field]: value };
+                updateEmployeeRecord(editingId!, { ...record, breaks: newBreaks });
+            }
+        }
+    };
+
+    const handleAddRecord = () => {
+        addEmployeeRecord(newRecord);
+        setNewRecord(newRecordObj);
+        onClose();
     };
 
     return (
@@ -36,7 +133,7 @@ const AddEditEmployee: React.FC<AddEditEmployeeProps> = ({ isOpen, isAddingRecor
                     <button className='btn btn-secondary' onClick={onClose} type='button'>
                         <FiX /> Cancel
                     </button>
-                    <button className='btn btn-primary' onClick={onSave}>
+                    <button className='btn btn-primary' onClick={() => (isAddingRecord ? handleAddRecord() : () => setEditingId(null))}>
                         <FiCheck /> {isAddingRecord ? 'Add' : 'Save'}
                     </button>
                 </div>
