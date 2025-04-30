@@ -6,11 +6,12 @@ interface ModalProps {
     onClose: () => void;
     title: string;
     children: React.ReactNode;
-    size?: 'sm' | 'md' | 'lg' | 'xl' | '5xl' | '7xl'; // Modal size options
+    size?: 'sm' | 'md' | 'lg' | 'xl' | '3xl' | '4xl' | '5xl' | '7xl'; // Modal size options
     footer?: React.ReactNode; // Optional footer content
+    icon?: React.ReactNode; // Icon to display in the header
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 'md', footer }) => {
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 'md', icon, footer }) => {
     if (!isOpen) return null;
 
     // Map size to TailwindCSS width classes
@@ -19,6 +20,8 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
         md: 'max-w-md',
         lg: 'max-w-lg',
         xl: 'max-w-2xl',
+        '3xl': 'max-w-4xl',
+        '4xl': 'max-w-4xl',
         '5xl': 'max-w-5xl',
         '7xl': 'max-w-7xl',
     };
@@ -28,7 +31,10 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
             <div className={`relative bg-white rounded-lg shadow-lg w-full ${sizeClasses[size]} max-h-[90vh] overflow-hidden animate-scale-in`}>
                 {/* Modal Header */}
                 <div className='flex justify-between items-center py-2 px-4 border-b'>
-                    <h2 className='text-lg font-semibold text-neutral-800'>{title}</h2>
+                    <div className='flex items-center space-x-2'>
+                        <div className='text-primary-600'>{icon || ''}</div>
+                        <h2 className='text-lg font-semibold text-neutral-800'>{title}</h2>
+                    </div>
                     <button onClick={onClose} className='text-neutral-500 hover:text-neutral-700 focus:outline-none'>
                         <FaTimes />
                     </button>

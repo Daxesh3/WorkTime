@@ -8,6 +8,7 @@ import Card from '../../components/ui/Card';
 import TimePicker from '../../components/ui/TimePicker';
 import useCompanyStore from '../../store/companyStore';
 import useWorkTimeStore from '../../store/workTimeStore';
+import { FaPlus } from 'react-icons/fa';
 
 interface AddEditEmployeeProps {
     editingId: string | null;
@@ -47,7 +48,6 @@ const AddEditEmployee: React.FC<AddEditEmployeeProps> = ({ isOpen, editingId, is
 
     const editedRecord = useMemo(() => employeeRecords.find((r) => r.id === editingId), [employeeRecords, editingId]);
     const [newRecord, setNewRecord] = useState<EmployeeRecord>(isAddingRecord ? initialRecord : editedRecord!);
-    console.log(' newRecord:', newRecord);
 
     const handleFieldChange = (field: keyof EmployeeRecord, value: any) => {
         setNewRecord((prev) => {
@@ -101,10 +101,11 @@ const AddEditEmployee: React.FC<AddEditEmployeeProps> = ({ isOpen, editingId, is
 
     return (
         <Modal
-            size='5xl'
+            size='4xl'
             isOpen={isOpen}
             onClose={onClose}
             title={isAddingRecord ? 'Add Company' : 'Edit Company'}
+            icon={isAddingRecord ? <FaPlus /> : <FiEdit2 />}
             footer={
                 <div className='flex space-x-2'>
                     <button className='btn btn-secondary' onClick={onClose}>
@@ -116,86 +117,76 @@ const AddEditEmployee: React.FC<AddEditEmployeeProps> = ({ isOpen, editingId, is
                 </div>
             }
         >
-            <Card title={isAddingRecord ? 'Add New Record' : 'Edit Record'} icon={<FiEdit2 size={20} />}>
-                <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                    <div>
-                        {isAddingRecord && (
-                            <div className='mb-4'>
-                                <label className='input-label'>Employee Name</label>
-                                <input
-                                    type='text'
-                                    value={newRecord.name}
-                                    onChange={(e) => handleFieldChange('name', e.target.value)}
-                                    className='time-input w-full'
-                                    placeholder='Enter employee name'
-                                />
-                            </div>
-                        )}
-                        <div className='grid grid-cols-2 gap-4 mb-4'>
-                            <TimePicker
-                                className='w-full'
-                                label='Clock In'
-                                value={newRecord.clockIn}
-                                onChange={(value) => handleFieldChange('clockIn', value)}
-                            />
-                            <TimePicker
-                                className='w-full'
-                                label='Clock Out'
-                                value={newRecord.clockOut}
-                                onChange={(value) => handleFieldChange('clockOut', value)}
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                <div>
+                    {isAddingRecord && (
+                        <div className='mb-4'>
+                            <label className='input-label'>Employee Name</label>
+                            <input
+                                type='text'
+                                value={newRecord.name}
+                                onChange={(e) => handleFieldChange('name', e.target.value)}
+                                className='time-input w-full'
+                                placeholder='Enter employee name'
                             />
                         </div>
-
-                        <div className='grid grid-cols-2 gap-4 mb-6'>
-                            <TimePicker
-                                className='w-full'
-                                label='Lunch Start'
-                                value={newRecord.lunchStart}
-                                onChange={(value) => handleFieldChange('lunchStart', value)}
-                            />
-                            <TimePicker
-                                className='w-full'
-                                label='Lunch End'
-                                value={newRecord.lunchEnd}
-                                onChange={(value) => handleFieldChange('lunchEnd', value)}
-                            />
-                        </div>
+                    )}
+                    <div className='grid grid-cols-2 gap-4 mb-4'>
+                        <TimePicker
+                            className='w-full'
+                            label='Clock In'
+                            value={newRecord.clockIn}
+                            onChange={(value) => handleFieldChange('clockIn', value)}
+                        />
+                        <TimePicker
+                            className='w-full'
+                            label='Clock Out'
+                            value={newRecord.clockOut}
+                            onChange={(value) => handleFieldChange('clockOut', value)}
+                        />
                     </div>
 
-                    <div>
-                        <div className='flex items-center justify-between mb-4'>
-                            <label className='input-label'>Additional Breaks</label>
-                            <button
-                                type='button'
-                                className='text-sm text-primary-600 hover:text-primary-800 flex items-center'
-                                onClick={handleAddBreak}
-                            >
-                                <FiPlus className='mr-1' /> Add Break
-                            </button>
-                        </div>
-
-                        <div className='space-y-3'>
-                            {(newRecord.breaks || []).map((b, idx) => (
-                                <div key={idx} className='flex items-center space-x-2 p-2 border border-neutral-200 rounded-lg bg-neutral-50'>
-                                    <TimePicker value={b.start} onChange={(val) => handleBreakChange(idx, 'start', val)} className='w-24 text-sm' />
-                                    <span className='text-neutral-400'>to</span>
-                                    <TimePicker value={b.end} onChange={(val) => handleBreakChange(idx, 'end', val)} className='w-24 text-sm' />
-                                    <button
-                                        type='button'
-                                        className='text-error-500 hover:text-error-700 ml-auto'
-                                        onClick={() => handleRemoveBreak(idx)}
-                                    >
-                                        <FiTrash2 />
-                                    </button>
-                                </div>
-                            ))}
-                            {(newRecord.breaks || []).length === 0 && (
-                                <div className='text-sm text-neutral-500 italic p-2'>No additional breaks added</div>
-                            )}
-                        </div>
+                    <div className='grid grid-cols-2 gap-4 mb-6'>
+                        <TimePicker
+                            className='w-full'
+                            label='Lunch Start'
+                            value={newRecord.lunchStart}
+                            onChange={(value) => handleFieldChange('lunchStart', value)}
+                        />
+                        <TimePicker
+                            className='w-full'
+                            label='Lunch End'
+                            value={newRecord.lunchEnd}
+                            onChange={(value) => handleFieldChange('lunchEnd', value)}
+                        />
                     </div>
                 </div>
-            </Card>
+
+                <div>
+                    <div className='flex items-center justify-between mb-2'>
+                        <label className='input-label'>Additional Breaks</label>
+                        <button type='button' className='text-sm text-primary-600 hover:text-primary-800 flex items-center' onClick={handleAddBreak}>
+                            <FiPlus className='mr-1' /> Add Break
+                        </button>
+                    </div>
+
+                    <div className='space-y-1'>
+                        {(newRecord.breaks || []).map((b, idx) => (
+                            <div key={idx} className='flex items-center space-x-2 p-2 border border-neutral-200 rounded-lg bg-neutral-50'>
+                                <TimePicker value={b.start} onChange={(val) => handleBreakChange(idx, 'start', val)} className='w-24 text-sm' />
+                                <span className='text-neutral-400'>to</span>
+                                <TimePicker value={b.end} onChange={(val) => handleBreakChange(idx, 'end', val)} className='w-24 text-sm' />
+                                <button type='button' className='text-error-500 hover:text-error-700 ml-auto' onClick={() => handleRemoveBreak(idx)}>
+                                    <FiTrash2 />
+                                </button>
+                            </div>
+                        ))}
+                        {(newRecord.breaks || []).length === 0 && (
+                            <div className='text-sm text-neutral-500 italic p-2'>No additional breaks added</div>
+                        )}
+                    </div>
+                </div>
+            </div>
         </Modal>
     );
 };
