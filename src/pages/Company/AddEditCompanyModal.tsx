@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FiSun, FiAlertCircle, FiCoffee, FiClock } from 'react-icons/fi';
+import { FiSun, FiAlertCircle, FiCoffee, FiClock, FiPlus, FiTrash2 } from 'react-icons/fi';
 
 import { CompanyParameters } from '../../shared/types';
 import Modal from '../../components/ui/Modal';
@@ -117,7 +117,6 @@ const AddEditCompanyModal: React.FC<AddEditCompanyModalProps> = ({ isOpen, onClo
                         </div>
                     </div>
                 </Card>
-
                 {/* Lunch Break */}
                 <Card title='Lunch Break' icon={<FiCoffee size={20} />}>
                     <div className='grid grid-cols-2 gap-4'>

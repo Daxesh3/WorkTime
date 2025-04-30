@@ -7,7 +7,7 @@ import { defaultParameters } from '../pages/Company/AddEditCompanyModal';
 interface CompanyStore {
     companies: Company[];
     currentCompanyId: string | null;
-    addCompany: (company: Omit<Company, 'id' | 'createdAt' | 'updatedAt'>) => void;
+    addCompany: (company: Omit<Company, 'id' | 'createdAt' | 'updatedAt' | 'shifts'>) => void;
     updateCompany: (id: string, updates: Partial<Company>) => void;
     deleteCompany: (id: string) => void;
     setCurrentCompany: (id: string) => void;
@@ -26,7 +26,7 @@ const useCompanyStore = create<CompanyStore>()(
                 const newCompany: Company = {
                     id: Date.now().toString(),
                     name: company.name,
-                    shifts: company.shifts || [],
+                    shifts: [],
                     parameters: company.parameters,
                     createdAt: new Date(),
                     updatedAt: new Date(),

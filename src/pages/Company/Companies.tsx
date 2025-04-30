@@ -3,23 +3,15 @@ import { FaPlus, FaEdit, FaTrash, FaCheck, FaTimes, FaClock, FaExclamationCircle
 import Card from '../../components/ui/Card';
 import useCompanyStore from '../../store/companyStore';
 import TimePicker from '../../components/ui/TimePicker';
-import { Company, CompanyParameters } from '../../shared/types';
+import { Company } from '../../shared/types';
 import AddEditCompanyModal from './AddEditCompanyModal';
-import { el } from 'date-fns/locale';
+import { useNavigate } from 'react-router-dom';
 
 // Interfaces for company parameters
 
-interface ICompany {
-    id: string;
-    name: string;
-    parameters: CompanyParameters;
-    createdAt: Date;
-    updatedAt: Date;
-}
-
 const Companies: React.FC = () => {
     const { companies, addCompany, updateCompany, deleteCompany, setCurrentCompany, currentCompanyId } = useCompanyStore();
-
+    const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingCompany, setEditingCompany] = useState<Company | null>(null);
 
@@ -70,13 +62,18 @@ const Companies: React.FC = () => {
                                     </tr>
                                 </thead>
                                 <tbody className='bg-white divide-y divide-neutral-100'>
-                                    {companies.map((company: ICompany) => (
+                                    {companies.map((company: Company) => (
                                         <tr
                                             key={company.id}
                                             className={`hover:bg-neutral-50 ${company.id === currentCompanyId ? 'bg-primary-50' : ''}`}
                                         >
                                             <td className='py-4 whitespace-nowrap'>
-                                                <div className='text-sm font-medium text-neutral-900'>{company.name}</div>
+                                                <div
+                                                    className='text-sm font-medium text-neutral-900'
+                                                    onClick={() => navigate(`/companies/${company.id}`)}
+                                                >
+                                                    {company.name}
+                                                </div>
                                             </td>
                                             <td className='py-4 whitespace-nowrap'>
                                                 <div className='text-sm text-neutral-500'>{new Date(company.createdAt).toLocaleDateString()}</div>

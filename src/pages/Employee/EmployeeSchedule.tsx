@@ -1,14 +1,16 @@
 import React, { useMemo, useState } from 'react';
 import { FiUsers, FiEdit2, FiTrash2, FiPlus, FiClock, FiCheck, FiX, FiCalendar } from 'react-icons/fi';
-import Card from '../components/ui/Card';
-import TimePicker from '../components/ui/TimePicker';
-import useWorkTimeStore from '../store/workTimeStore';
 import { format } from 'date-fns';
+
+import Card from '../../components/ui/Card';
+import TimePicker from '../../components/ui/TimePicker';
+import useWorkTimeStore from '../../store/workTimeStore';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useNavigate } from 'react-router-dom';
-import { Break, CompanyParameters, EmployeeRecord, Parameters } from '../shared/types';
-import useCompanyStore from '../store/companyStore';
+import { Break, CompanyParameters, EmployeeRecord } from '../../shared/types';
+import useCompanyStore from '../../store/companyStore';
+import AddEditEmployee from './AddEditEmployee';
 
 const EmployeeSchedule: React.FC = () => {
     const navigate = useNavigate();
@@ -164,38 +166,17 @@ const EmployeeSchedule: React.FC = () => {
                     </button>
                 }
             >
-                <div className='flex items-center'>
-                    <div className='flex-grow'>
-                        <div className='mb-4'>
-                            <label className='input-label'>Select Date</label>
-                            <DatePicker
-                                selected={selectedDate}
-                                onChange={(date: Date) => setSelectedDate(date)}
-                                dateFormat='MMM d, yyyy'
-                                className='time-input w-48'
-                            />
-                        </div>
-                    </div>
-                    <div className='text-neutral-500 text-sm'>
-                        <div className='p-3 bg-neutral-50 rounded-lg'>
-                            <p>
-                                Standard hours: <span className='font-medium'>{parameters.workingHours.totalRequired} hours</span>
-                            </p>
-                            <p>
-                                Work day:{' '}
-                                <span className='font-medium'>
-                                    {parameters.workingHours.start} - {parameters.workingHours.end}
-                                </span>
-                            </p>
-                            <p>
-                                Date: <span className='font-medium'>{format(selectedDate, 'EEEE, MMMM d, yyyy')}</span>
-                            </p>
-                        </div>
-                    </div>
+                <div className='mb-4'>
+                    <label className='input-label'>Select Date</label>
+                    <DatePicker
+                        selected={selectedDate}
+                        onChange={(date: Date) => setSelectedDate(date)}
+                        dateFormat='MMM d, yyyy'
+                        className='time-input w-48'
+                    />
                 </div>
             </Card>
 
-            {/* Form for adding/editing records */}
             {(isAddingRecord || editingId) && (
                 <div className='animate-fade-in-down animate-duration-300'>
                     <Card
@@ -297,8 +278,6 @@ const EmployeeSchedule: React.FC = () => {
                                         <FiPlus className='mr-1' /> Add Break
                                     </button>
                                 </div>
-
-                                {/* Break list */}
                                 <div className='space-y-3'>
                                     {(isAddingRecord ? newRecord.breaks : employeeRecords.find((r) => r.id === editingId)?.breaks || []).map(
                                         (breakItem, index) => (
@@ -337,7 +316,6 @@ const EmployeeSchedule: React.FC = () => {
                 </div>
             )}
 
-            {/* Employee Records Table */}
             <Card title='Time Records' subtitle={`${format(selectedDate, 'MMMM d, yyyy')}`} icon={<FiUsers size={20} />} className='animate-fade-in'>
                 {filteredRecords.length > 0 ? (
                     <div className='overflow-x-auto -mx-4 px-4'>
