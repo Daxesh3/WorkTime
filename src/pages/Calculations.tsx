@@ -7,6 +7,7 @@ import useWorkTimeStore from '../store/workTimeStore';
 import TimePicker from '../components/ui/TimePicker';
 import useCompanyStore from '../store/companyStore';
 import { CompanyParameters, Parameters } from '../shared/types';
+import TitleText from '../components/ui/header';
 
 // Types for simulation record and calculation result
 interface Break {
@@ -148,10 +149,7 @@ const Calculations: React.FC = () => {
 
     return (
         <div className='space-y-6 py-4'>
-            <div className='animate-fade-in-down animate-duration-300'>
-                <h1 className='text-2xl font-semibold text-neutral-800'>Working Time Calculator</h1>
-                <p className='text-neutral-500 mt-1'>Simulate working time calculations based on your settings</p>
-            </div>
+            <TitleText title='Working Time Calculator' subtitle='Simulate working time calculations based on your settings' />
 
             <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
                 <div className='lg:col-span-2'>

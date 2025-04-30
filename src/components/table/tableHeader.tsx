@@ -52,7 +52,7 @@ const TableHeader: FC<ITableHeadProps> = ({ tableCellList, sortData, onSort, cla
                         key={index}
                         className={`text-textGray text-sm-responsive relative text-sm font-semibold capitalize ${
                             sortable ? 'cursor-pointer' : ''
-                        } p-3 select-none`}
+                        } px-2 py-2 select-none`}
                         style={style}
                         onClick={() => sortable && onClick(key)}
                     >

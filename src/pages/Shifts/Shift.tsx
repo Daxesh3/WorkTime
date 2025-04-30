@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FiPlus, FiClock, FiCoffee, FiSun } from 'react-icons/fi';
+import { FaPlus } from 'react-icons/fa';
 
 import { ShiftManagementProps, ShiftTiming } from './Shift.types';
 import TableComponent from '../../components/table/table';
@@ -87,7 +87,7 @@ const ShiftManagement: React.FC<ShiftManagementProps> = ({ companyName, shifts, 
                         <p className='text-neutral-500 mt-1'>{companyName}</p>
                     </div>
                     <button onClick={() => handleOpenModal()} className='btn btn-primary' disabled={loading}>
-                        <FiPlus className='mr-2' /> Add New Shift
+                        <FaPlus /> Add New Shift
                     </button>
                 </div>
 

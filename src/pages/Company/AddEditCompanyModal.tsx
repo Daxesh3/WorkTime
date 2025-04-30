@@ -73,7 +73,6 @@ const AddEditCompanyModal: React.FC<AddEditCompanyModalProps> = ({ isOpen, onClo
             }
         >
             <div className='space-y-4'>
-                {/* Company Name */}
                 <div>
                     <label className='input-label'>Company Name</label>
                     <input
@@ -85,7 +84,6 @@ const AddEditCompanyModal: React.FC<AddEditCompanyModalProps> = ({ isOpen, onClo
                     />
                 </div>
 
-                {/* Working Hours */}
                 <Card title='Working Hours' icon={<FiClock size={20} />}>
                     <div className='grid grid-cols-2 gap-4'>
                         <div>
@@ -117,7 +115,6 @@ const AddEditCompanyModal: React.FC<AddEditCompanyModalProps> = ({ isOpen, onClo
                         </div>
                     </div>
                 </Card>
-                {/* Lunch Break */}
                 <Card title='Lunch Break' icon={<FiCoffee size={20} />}>
                     <div className='grid grid-cols-2 gap-4'>
                         <div>

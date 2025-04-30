@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import ShiftManagement from '../Shifts/ShiftManagement';
+import Shift from '../Shifts/Shift';
 import useCompanyStore from '../../store/companyStore';
 import { useParams } from 'react-router-dom';
 import { ShiftTiming } from '../Shifts/Shift.types';
@@ -36,7 +36,7 @@ const CompanyDetails: React.FC = () => {
     };
 
     return (
-        <ShiftManagement
+        <Shift
             companyName={currentCompany.name}
             shifts={currentCompany.shifts}
             onShiftCreate={handleShiftCreate}

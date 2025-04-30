@@ -1,9 +1,9 @@
-import React, { FC, Fragment } from 'react';
+import { FC, Fragment } from 'react';
 import TableRow from '../../components/table/tableRow';
 import TableCell from '../../components/table/tableCell';
-import { FaEdit, FaEye, FaTrash } from 'react-icons/fa';
-import { FiClock } from 'react-icons/fi';
+import { FiClock, FiTrash2 } from 'react-icons/fi';
 import { ShiftTiming } from './Shift.types';
+import { RiEdit2Line } from 'react-icons/ri';
 
 interface Props {
     id: string;
@@ -42,7 +42,7 @@ const ShiftRow: FC<Props> = ({ id, index, shift, onEdit, onDelete }) => {
                 <TableCell>{index}</TableCell>
                 <TableCell>
                     <div className='flex items-center'>
-                        <FiClock className='mr-2 text-primary-500' />
+                        <FiClock className='mr-1 text-primary-500' />
                         {shift.name}
                     </div>
                 </TableCell>
@@ -75,10 +75,9 @@ const ShiftRow: FC<Props> = ({ id, index, shift, onEdit, onDelete }) => {
                     </div>
                 </TableCell>
                 <TableCell>
-                    <div className='flex space-x-2'>
-                        <FaEye onClick={() => {}} className='text-primary size-[22px] cursor-pointer' />
-                        <FaEdit onClick={onEdit} className='text-success size-[22px] cursor-pointer' />
-                        <FaTrash onClick={onDelete} className='text-accent size-[22px] cursor-pointer' />
+                    <div className='flex justify-center space-x-2'>
+                        <RiEdit2Line onClick={onEdit} className='text-primary-600 hover:text-primary-800 cursor-pointer' />
+                        <FiTrash2 onClick={onDelete} className='text-error-600 hover:text-error-800 cursor-pointer' />
                     </div>
                 </TableCell>
             </TableRow>

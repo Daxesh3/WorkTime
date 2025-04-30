@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 import Layout from './components/layout/Layout';
-import EmployeeSchedule from './pages/Employee/EmployeeSchedule';
+import Employee from './pages/Employee/Employee';
 import Calculations from './pages/Calculations';
 import NotFound from './pages/NotFound';
 import Companies from './pages/Company/Companies';
@@ -17,7 +17,7 @@ const App: FC = () => {
                 <Route path='companies' element={<Companies />} />
                 <Route path='companies/:companyId' element={<CompanyDetails />} />
                 <Route path='parameters' element={<ParameterSettings />} />
-                <Route path='schedule' element={<EmployeeSchedule />} />
+                <Route path='employee' element={<Employee />} />
                 <Route path='calculations' element={<Calculations />} />
                 <Route path='*' element={<NotFound />} />
             </Route>
