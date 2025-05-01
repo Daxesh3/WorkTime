@@ -1,4 +1,5 @@
 import React, { FC } from 'react';
+import useCompanyStore from '../../store/companyStore';
 
 export type ShiftType = 'morning' | 'evening' | 'night' | 'regular';
 
@@ -8,6 +9,7 @@ interface ShiftTypeSelectorProps {
     className?: string;
     disabled?: boolean;
     label?: string;
+    company?: string;
 }
 
 const shiftOptions: { value: ShiftType; label: string }[] = [
@@ -17,7 +19,18 @@ const shiftOptions: { value: ShiftType; label: string }[] = [
     { value: 'night', label: 'Night Shift' },
 ];
 
-const ShiftTypeSelector: FC<ShiftTypeSelectorProps> = ({ value, onChange, className = '', disabled = false, label = 'Shift Type' }) => {
+const ShiftTypeSelector: FC<ShiftTypeSelectorProps> = ({ value, onChange, className = '', disabled = false, label = 'Shift Type', company }) => {
+    const { companies } = useCompanyStore();
+
+    const filteredShiftOptions = React.useMemo(() => {
+        if (company) {
+            const companyData = companies.find((c) => c.name === company);
+            const companyShiftNames = companyData?.shifts.map((s) => s.name) || [];
+            return shiftOptions.filter((option) => companyShiftNames.includes(option.value));
+        }
+        return shiftOptions;
+    }, [company, companies]);
+
     return (
         <div className='flex flex-col'>
             {label && <label className='input-label'>{label}</label>}
@@ -25,9 +38,9 @@ const ShiftTypeSelector: FC<ShiftTypeSelectorProps> = ({ value, onChange, classN
                 value={value}
                 onChange={(e) => onChange(e.target.value as ShiftType)}
                 disabled={disabled}
-                className={`time-input w-full ${className}`}
+                className={`time-input h-full bg-white w-full ${className}`}
             >
-                {shiftOptions.map((option) => (
+                {filteredShiftOptions.map((option) => (
                     <option key={option.value} value={option.value}>
                         {option.label}
                     </option>

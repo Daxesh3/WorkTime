@@ -68,19 +68,17 @@ const Calculations: React.FC = () => {
 
     // Initialize with pre-filled data if available
     useEffect(() => {
-        if (location.state?.record && parameters) {
+        if (location.state?.record) {
             setSimulationRecord(location.state.record);
-            const result = simulateCalculation(location.state.record, parameters);
+            const result = simulateCalculation(location.state.record);
             setCalculationResult(result);
         }
     }, [location.state, parameters, simulateCalculation]);
 
     // Run calculation simulation
     const runCalculation = () => {
-        if (parameters) {
-            const result = simulateCalculation(simulationRecord, parameters);
-            setCalculationResult(result);
-        }
+        // const result = simulateCalculation(simulationRecord);
+        // setCalculationResult(result);
     };
 
     // Handle updating simulation record fields

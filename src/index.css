@@ -111,3 +111,7 @@ body {
         opacity: 1;
     }
 }
+
+.react-datepicker-popper {
+    z-index: 11;
+}

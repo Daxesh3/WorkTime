@@ -7,8 +7,6 @@ import 'react-datepicker/dist/react-datepicker.css';
 
 import Card from '../../components/ui/Card';
 import useWorkTimeStore from '../../store/workTimeStore';
-import { CompanyParameters } from '../../shared/types';
-import useCompanyStore from '../../store/companyStore';
 import AddEditEmployee from './AddEditEmployee';
 import TableHeader, { ITableCell } from '../../components/table/tableHeader';
 import TableComponent from '../../components/table/table';
@@ -17,9 +15,6 @@ import EmployeeRow from './EmployeeRow';
 import TitleText from '../../components/ui/header';
 
 const EmployeeSchedule: React.FC = () => {
-    const { getCurrentParameters } = useCompanyStore();
-    const parameters: CompanyParameters = getCurrentParameters();
-
     const { employeeRecords, deleteEmployeeRecord } = useWorkTimeStore();
 
     const [isAddingRecord, setIsAddingRecord] = useState<boolean>(false);
@@ -70,7 +65,6 @@ const EmployeeSchedule: React.FC = () => {
                                         key={record.id}
                                         record={record}
                                         index={index + 1}
-                                        parameters={parameters}
                                         onEdit={() => setEditingId(record.id)}
                                         onDelete={() => deleteEmployeeRecord(record.id)}
                                     />

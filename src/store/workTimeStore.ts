@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Parameters, EmployeeRecord, Break, CalculationDetails } from '../shared/types'; // Assuming these types are defined in shared/types
+import { Parameters, EmployeeRecord } from '../shared/types'; // Assuming these types are defined in shared/types
 
 const timeToMinutes = (timeStr: string) => {
     const [hours, minutes] = timeStr.split(':').map(Number);
@@ -18,10 +18,10 @@ interface WorkTimeStore {
     parameters: Parameters;
     employeeRecords: EmployeeRecord[];
     updateParameters: (newParameters: Partial<Parameters>) => void;
-    addEmployeeRecord: (record: Omit<EmployeeRecord, 'id' | 'calculatedHours' | 'calculationDetails'>) => void;
+    addEmployeeRecord: (record: Omit<EmployeeRecord, 'id' | 'calculatedHours'>) => void;
     updateEmployeeRecord: (id: string, updates: Partial<EmployeeRecord>) => void;
     deleteEmployeeRecord: (id: string) => void;
-    simulateCalculation: (record: EmployeeRecord, parameters: Parameters) => CalculationResult;
+    simulateCalculation: (record: EmployeeRecord) => CalculationResult;
 }
 
 // Define the structure of the calculation result
@@ -93,7 +93,6 @@ const useWorkTimeStore = create<WorkTimeStore>()(
                     ...record,
                     id: Date.now().toString(),
                     calculatedHours: 0,
-                    calculationDetails: {} as CalculationDetails,
                 };
                 set({ employeeRecords: [...get().employeeRecords, newRecord] });
             },
@@ -227,10 +226,11 @@ const useWorkTimeStore = create<WorkTimeStore>()(
             //         lateDepartureMinutes: Math.round(Math.max(0, (endTime - standardEndTime) / (1000 * 60))),
             //     };
             // },
-            simulateCalculation: (record, parameters) => {
+            simulateCalculation: (record) => {
+                const shift = record.shift;
                 // Convert time strings to minutes for easier calculation
-                const workStartMin = timeToMinutes(parameters.workingHours.start);
-                const workEndMin = timeToMinutes(parameters.workingHours.end);
+                const workStartMin = timeToMinutes(shift.start);
+                const workEndMin = timeToMinutes(shift.end);
                 const clockInMin = timeToMinutes(record.clockIn);
                 const clockOutMin = timeToMinutes(record.clockOut);
                 const lunchStartMin = timeToMinutes(record.lunchStart);
@@ -241,7 +241,7 @@ const useWorkTimeStore = create<WorkTimeStore>()(
                 if (clockInMin < workStartMin) {
                     // Early arrival
                     const earlyByMinutes = workStartMin - clockInMin;
-                    if (earlyByMinutes <= parameters.earlyArrival.maxMinutes && parameters.earlyArrival.countTowardsTotal) {
+                    if (earlyByMinutes <= shift.earlyArrival.maxMinutes && shift.earlyArrival.countTowardsTotal) {
                         // Count early time
                         effectiveStartMin = clockInMin;
                     } else {
@@ -256,8 +256,8 @@ const useWorkTimeStore = create<WorkTimeStore>()(
                 if (clockOutMin > workEndMin) {
                     // Late stay
                     const lateByMinutes = clockOutMin - workEndMin;
-                    if (lateByMinutes <= parameters.lateStay.maxMinutes) {
-                        if (parameters.lateStay.countTowardsTotal) {
+                    if (lateByMinutes <= shift.lateStay.maxMinutes) {
+                        if (shift.lateStay.countTowardsTotal) {
                             // Count late time
                             effectiveEndMin = clockOutMin;
                         } else {
@@ -297,9 +297,9 @@ const useWorkTimeStore = create<WorkTimeStore>()(
                     totalWorkingMinutes,
                     regularHours: calculatedHours,
                     overtimeHours,
-                    overtimeRate: parameters.lateStay.overtimeMultiplier,
-                    overtimePay: overtimeHours * parameters.lateStay.overtimeMultiplier,
-                    totalEffectiveHours: calculatedHours + overtimeHours * parameters.lateStay.overtimeMultiplier,
+                    overtimeRate: shift.lateStay.overtimeMultiplier,
+                    overtimePay: overtimeHours * shift.lateStay.overtimeMultiplier,
+                    totalEffectiveHours: calculatedHours + overtimeHours * shift.lateStay.overtimeMultiplier,
                     // Status calculations
                     earlyArrival: clockInMin < workStartMin,
                     earlyArrivalMinutes: clockInMin < workStartMin ? workStartMin - clockInMin : 0,
@@ -310,9 +310,9 @@ const useWorkTimeStore = create<WorkTimeStore>()(
                     lateDeparture: clockOutMin > workEndMin,
                     lateDepartureMinutes: clockOutMin > workEndMin ? clockOutMin - workEndMin : 0,
                     isLunchBreakInWindow:
-                        lunchStartMin >= timeToMinutes(parameters.lunchBreak.flexWindowStart) &&
-                        lunchEndMin <= timeToMinutes(parameters.lunchBreak.flexWindowEnd),
-                    isLunchBreakCorrectDuration: lunchBreakMinutes === parameters.lunchBreak.duration,
+                        lunchStartMin >= timeToMinutes(shift.lunchBreak.flexWindowStart) &&
+                        lunchEndMin <= timeToMinutes(shift.lunchBreak.flexWindowEnd),
+                    isLunchBreakCorrectDuration: lunchBreakMinutes === shift.lunchBreak.duration,
                 };
             },
         }),

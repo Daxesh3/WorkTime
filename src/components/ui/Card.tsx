@@ -13,7 +13,7 @@ const Card: FC<CardProps> = ({ children, title, subtitle, icon, className = '', 
     return (
         <div className={`card animate-fade-in-down animate-duration-300  ${className}`}>
             {(title || icon || actionButton) && (
-                <div className='flex items-center justify-between border-b border-neutral-200 px-4 py-3'>
+                <div className='flex items-center justify-between border-b border-neutral-200 px-4 py-2'>
                     <div className='flex items-center '>
                         {icon && <div className='mr-3 text-primary-600'>{icon}</div>}
                         <div>
@@ -24,7 +24,7 @@ const Card: FC<CardProps> = ({ children, title, subtitle, icon, className = '', 
                     {actionButton && <div>{actionButton}</div>}
                 </div>
             )}
-            <div className='p-4'>{children}</div>
+            <div className='px-4 py-3'>{children}</div>
         </div>
     );
 };

@@ -7,11 +7,11 @@ import { FaCalculator } from 'react-icons/fa';
 
 import { EmployeeRecord } from '../../shared/types';
 import { useNavigate } from 'react-router-dom';
+import { ShiftTiming } from '../Shifts/Shift.types';
 
 interface Props {
     record: EmployeeRecord;
     index: number;
-    parameters: any;
     onEdit: () => void;
     onDelete: () => void;
 }
@@ -22,7 +22,7 @@ const getTimeStatusClass = (time: string, reference: string, isStart: boolean) =
     return 'text-error-500';
 };
 
-const EmployeeRow: React.FC<Props> = ({ record, parameters, onEdit, onDelete }) => {
+const EmployeeRow: React.FC<Props> = ({ record, onEdit, onDelete }) => {
     const navigate = useNavigate();
 
     return (
@@ -32,16 +32,16 @@ const EmployeeRow: React.FC<Props> = ({ record, parameters, onEdit, onDelete }) 
             </TableCell>
             <TableCell>
                 <div className='flex flex-col text-sm'>
-                    <span className={getTimeStatusClass(record.clockIn, parameters.workingHours.start, true)}>
+                    <span className={getTimeStatusClass(record.clockIn, record.shift.start, true)}>
                         In: {record.clockIn}
-                        {record.clockIn !== parameters.workingHours.start && (
-                            <span className='ml-1 text-xs'>({record.clockIn < parameters.workingHours.start ? 'early' : 'late'})</span>
+                        {record.clockIn !== record.shift.start && (
+                            <span className='ml-1 text-xs'>({record.clockIn <= record.shift.start ? 'early' : 'late'})</span>
                         )}
                     </span>
-                    <span className={getTimeStatusClass(record.clockOut, parameters.workingHours.end, false)}>
+                    <span className={getTimeStatusClass(record.clockOut, record.shift.end, false)}>
                         Out: {record.clockOut}
-                        {record.clockOut !== parameters.workingHours.end && (
-                            <span className='ml-1 text-xs'>({record.clockOut > parameters.workingHours.end ? 'overtime' : 'early'})</span>
+                        {record.clockOut !== record.shift.end && (
+                            <span className='ml-1 text-xs'>({record.clockOut > record.shift.end ? 'overtime' : 'early'})</span>
                         )}
                     </span>
                 </div>
@@ -80,6 +80,7 @@ const EmployeeRow: React.FC<Props> = ({ record, parameters, onEdit, onDelete }) 
                                         lunchStart: record.lunchStart,
                                         lunchEnd: record.lunchEnd,
                                         breaks: record.breaks,
+                                        shift: record.shift,
                                     },
                                 },
                             })
