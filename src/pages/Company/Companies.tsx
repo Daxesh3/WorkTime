@@ -12,7 +12,7 @@ import CompanyRow from './CompanyRow';
 import TitleText from '../../components/ui/header';
 
 const Companies: React.FC = () => {
-    const { companies, addCompany, updateCompany, deleteCompany, setCurrentCompany, currentCompanyId } = useCompanyStore();
+    const { companies, addCompany, updateCompany, deleteCompany } = useCompanyStore();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingCompany, setEditingCompany] = useState<Company | null>(null);
 
@@ -55,8 +55,6 @@ const Companies: React.FC = () => {
                                 <CompanyRow
                                     key={company.id}
                                     company={company}
-                                    currentCompanyId={currentCompanyId || ''}
-                                    onSelect={() => setCurrentCompany(company.id)}
                                     onEdit={() => openEditModal(company)}
                                     onDelete={() => deleteCompany(company.id)}
                                 />
@@ -87,6 +85,7 @@ const CompanyTable_Cells: ITableCell[] = [
     { title: 'Company Name', key: 'name' },
     { title: 'Created', key: 'created' },
     { title: 'Last Updated', key: 'updated' },
+    { title: 'Shift', key: 'Shift' },
     { title: 'Actions', key: 'actions', style: { width: '160px' } },
 ];
 

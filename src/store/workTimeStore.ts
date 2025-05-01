@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { differenceInMinutes, addMinutes, format } from 'date-fns';
 import { Parameters, EmployeeRecord } from '../shared/types'; // Assuming these types are defined in shared/types
+import { formatDurationManually } from '../shared/utils';
 
 const timeToMinutes = (timeStr: string) => {
     const [hours, minutes] = timeStr.split(':').map(Number);
@@ -25,16 +27,16 @@ interface WorkTimeStore {
 }
 
 // Define the structure of the calculation result
-interface CalculationResult {
+export interface CalculationResult {
     effectiveStart: string;
     effectiveEnd: string;
     totalWorkingMinutes: number;
     lunchDuration: number;
     otherBreaksDuration: number;
-    regularHours: number;
+    regularHours: string;
     overtimeHours: number;
     overtimePay: number;
-    totalEffectiveHours: number;
+    totalEffectiveHours: string;
     isLunchBreakInWindow: boolean;
     isLunchBreakCorrectDuration: boolean;
     earlyArrival: boolean;
@@ -92,7 +94,6 @@ const useWorkTimeStore = create<WorkTimeStore>()(
                 const newRecord: EmployeeRecord = {
                     ...record,
                     id: Date.now().toString(),
-                    calculatedHours: 0,
                 };
                 set({ employeeRecords: [...get().employeeRecords, newRecord] });
             },
@@ -226,93 +227,194 @@ const useWorkTimeStore = create<WorkTimeStore>()(
             //         lateDepartureMinutes: Math.round(Math.max(0, (endTime - standardEndTime) / (1000 * 60))),
             //     };
             // },
+            // simulateCalculation: (record) => {
+            //     const shift = record.shift;
+            //     // Convert time strings to minutes for easier calculation
+            //     const workStartMin = timeToMinutes(shift.start);
+            //     const workEndMin = timeToMinutes(shift.end);
+            //     const clockInMin = timeToMinutes(record.clockIn);
+            //     const clockOutMin = timeToMinutes(record.clockOut);
+            //     const lunchStartMin = timeToMinutes(record.lunchStart);
+            //     const lunchEndMin = timeToMinutes(record.lunchEnd);
+
+            //     // Calculate effective start time
+            //     let effectiveStartMin = clockInMin;
+            //     if (clockInMin < workStartMin) {
+            //         // Early arrival
+            //         const earlyByMinutes = workStartMin - clockInMin;
+            //         if (earlyByMinutes <= shift.earlyArrival.maxMinutes && shift.earlyArrival.countTowardsTotal) {
+            //             // Count early time
+            //             effectiveStartMin = clockInMin;
+            //         } else {
+            //             // Don't count early time
+            //             effectiveStartMin = workStartMin;
+            //         }
+            //     }
+
+            //     // Calculate effective end time
+            //     let effectiveEndMin = clockOutMin;
+            //     let overtimeMinutes = 0;
+            //     if (clockOutMin > workEndMin) {
+            //         // Late stay
+            //         const lateByMinutes = clockOutMin - workEndMin;
+            //         if (lateByMinutes <= shift.lateStay.maxMinutes) {
+            //             if (shift.lateStay.countTowardsTotal) {
+            //                 // Count late time
+            //                 effectiveEndMin = clockOutMin;
+            //             } else {
+            //                 // Don't count late time
+            //                 effectiveEndMin = workEndMin;
+            //             }
+            //         } else {
+            //             // Handle overtime
+            //             effectiveEndMin = workEndMin;
+            //             overtimeMinutes = lateByMinutes;
+            //         }
+            //     }
+
+            //     // Calculate lunch break time
+            //     const lunchBreakMinutes = lunchEndMin - lunchStartMin;
+
+            //     // Calculate other break times
+            //     const otherBreakMinutes = record.breaks.reduce((total, breakPeriod) => {
+            //         return total + (timeToMinutes(breakPeriod.end) - timeToMinutes(breakPeriod.start));
+            //     }, 0);
+
+            //     // Calculate total working minutes
+            //     let totalWorkingMinutes = effectiveEndMin - effectiveStartMin - lunchBreakMinutes - otherBreakMinutes;
+
+            //     // Convert to hours
+            //     const calculatedHours = totalWorkingMinutes / 60;
+
+            //     // Calculate overtime hours
+            //     const overtimeHours = overtimeMinutes / 60;
+
+            //     // Create detailed calculation breakdown
+            //     return {
+            //         effectiveStart: minutesToTime(effectiveStartMin),
+            //         effectiveEnd: minutesToTime(effectiveEndMin),
+            //         lunchDuration: lunchBreakMinutes,
+            //         otherBreaksDuration: otherBreakMinutes,
+            //         totalWorkingMinutes,
+            //         regularHours: calculatedHours,
+            //         overtimeHours,
+            //         overtimeRate: shift.lateStay.overtimeMultiplier,
+            //         overtimePay: overtimeHours * shift.lateStay.overtimeMultiplier,
+            //         totalEffectiveHours: calculatedHours + overtimeHours * shift.lateStay.overtimeMultiplier,
+            //         // Status calculations
+            //         earlyArrival: clockInMin < workStartMin,
+            //         earlyArrivalMinutes: clockInMin < workStartMin ? workStartMin - clockInMin : 0,
+            //         lateArrival: clockInMin > workStartMin,
+            //         lateArrivalMinutes: clockInMin > workStartMin ? clockInMin - workStartMin : 0,
+            //         earlyDeparture: clockOutMin < workEndMin,
+            //         earlyDepartureMinutes: clockOutMin < workEndMin ? workEndMin - clockOutMin : 0,
+            //         lateDeparture: clockOutMin > workEndMin,
+            //         lateDepartureMinutes: clockOutMin > workEndMin ? clockOutMin - workEndMin : 0,
+            //         isLunchBreakInWindow:
+            //             lunchStartMin >= timeToMinutes(shift.lunchBreak.flexWindowStart) &&
+            //             lunchEndMin <= timeToMinutes(shift.lunchBreak.flexWindowEnd),
+            //         isLunchBreakCorrectDuration: lunchBreakMinutes === shift.lunchBreak.duration,
+            //     };
+            // },
             simulateCalculation: (record) => {
                 const shift = record.shift;
-                // Convert time strings to minutes for easier calculation
-                const workStartMin = timeToMinutes(shift.start);
-                const workEndMin = timeToMinutes(shift.end);
-                const clockInMin = timeToMinutes(record.clockIn);
-                const clockOutMin = timeToMinutes(record.clockOut);
-                const lunchStartMin = timeToMinutes(record.lunchStart);
-                const lunchEndMin = timeToMinutes(record.lunchEnd);
+
+                // Helper to parse time strings into Date objects
+                const parseTime = (timeStr: string, baseDate: Date = new Date()) => {
+                    const [hours, minutes] = timeStr.split(':').map(Number);
+                    const date = new Date(baseDate);
+                    date.setHours(hours, minutes, 0, 0);
+                    return date;
+                };
+
+                // Parse shift and record times
+                const workStart = parseTime(shift.start);
+                const workEnd = parseTime(shift.end, shift.start > shift.end ? addMinutes(workStart, 24 * 60) : workStart); // Handle night shifts
+                const clockIn = parseTime(record.clockIn);
+                const clockOut = parseTime(record.clockOut, record.clockIn > record.clockOut ? addMinutes(clockIn, 24 * 60) : clockIn); // Handle night shifts
+                const lunchStart = parseTime(record.lunchStart);
+                const lunchEnd = parseTime(record.lunchEnd);
+                const flexWindowStart = parseTime(shift.lunchBreak.flexWindowStart);
+                const flexWindowEnd = parseTime(shift.lunchBreak.flexWindowEnd);
 
                 // Calculate effective start time
-                let effectiveStartMin = clockInMin;
-                if (clockInMin < workStartMin) {
-                    // Early arrival
-                    const earlyByMinutes = workStartMin - clockInMin;
-                    if (earlyByMinutes <= shift.earlyArrival.maxMinutes && shift.earlyArrival.countTowardsTotal) {
-                        // Count early time
-                        effectiveStartMin = clockInMin;
-                    } else {
-                        // Don't count early time
-                        effectiveStartMin = workStartMin;
+                let effectiveStart = clockIn;
+                if (clockIn < workStart) {
+                    const earlyByMinutes = differenceInMinutes(workStart, clockIn);
+                    if (earlyByMinutes > shift.earlyArrival.maxMinutes || !shift.earlyArrival.countTowardsTotal) {
+                        effectiveStart = workStart;
                     }
                 }
 
                 // Calculate effective end time
-                let effectiveEndMin = clockOutMin;
+                let effectiveEnd = clockOut;
+                let overtimeHours = 0;
                 let overtimeMinutes = 0;
-                if (clockOutMin > workEndMin) {
-                    // Late stay
-                    const lateByMinutes = clockOutMin - workEndMin;
-                    if (lateByMinutes <= shift.lateStay.maxMinutes) {
-                        if (shift.lateStay.countTowardsTotal) {
-                            // Count late time
-                            effectiveEndMin = clockOutMin;
-                        } else {
-                            // Don't count late time
-                            effectiveEndMin = workEndMin;
-                        }
-                    } else {
-                        // Handle overtime
-                        effectiveEndMin = workEndMin;
+                if (clockOut > workEnd) {
+                    const lateByMinutes = differenceInMinutes(clockOut, workEnd);
+                    if (lateByMinutes > shift.lateStay.maxMinutes) {
                         overtimeMinutes = lateByMinutes;
+                        effectiveEnd = workEnd;
+                        overtimeHours = overtimeMinutes / 60;
+                    } else if (!shift.lateStay.countTowardsTotal) {
+                        effectiveEnd = workEnd;
                     }
                 }
 
-                // Calculate lunch break time
-                const lunchBreakMinutes = lunchEndMin - lunchStartMin;
+                // Calculate lunch break duration
+                const lunchBreakMinutes = differenceInMinutes(lunchEnd, lunchStart);
 
-                // Calculate other break times
+                // Calculate other breaks duration
                 const otherBreakMinutes = record.breaks.reduce((total, breakPeriod) => {
-                    return total + (timeToMinutes(breakPeriod.end) - timeToMinutes(breakPeriod.start));
+                    const breakStart = parseTime(breakPeriod.start);
+                    const breakEnd = parseTime(breakPeriod.end);
+                    return total + differenceInMinutes(breakEnd, breakStart);
                 }, 0);
 
                 // Calculate total working minutes
-                let totalWorkingMinutes = effectiveEndMin - effectiveStartMin - lunchBreakMinutes - otherBreakMinutes;
+                const totalWorkingMinutes = differenceInMinutes(effectiveEnd, effectiveStart) - lunchBreakMinutes - otherBreakMinutes;
 
-                // Convert to hours
-                const calculatedHours = totalWorkingMinutes / 60;
+                // Convert total working minutes to HH:mm format
+                const calculatedHours = format(addMinutes(new Date(0).getTime(), totalWorkingMinutes), 'HH:mm');
 
-                // Calculate overtime hours
-                const overtimeHours = overtimeMinutes / 60;
+                // Calculate overtime hours in HH:mm format
+                // const overtimeHours = format(addMinutes(new Date(0), overtimeMinutes), 'HH:mm');
 
-                // Create detailed calculation breakdown
+                // Calculate overtime pay
+                const overtimePay = (overtimeMinutes / 60) * shift.lateStay.overtimeMultiplier;
+
+                // Check lunch break window
+                const isLunchBreakInWindow = lunchStart >= flexWindowStart && lunchEnd <= flexWindowEnd;
+                const isLunchBreakCorrectDuration = lunchBreakMinutes === shift.lunchBreak.duration;
+
+                // Calculate early/late arrival and departure
+                const earlyArrivalMinutes = clockIn < workStart ? differenceInMinutes(workStart, clockIn) : 0;
+                const lateArrivalMinutes = clockIn > workStart ? differenceInMinutes(clockIn, workStart) : 0;
+                const earlyDepartureMinutes = clockOut < workEnd ? differenceInMinutes(workEnd, clockOut) : 0;
+                const lateDepartureMinutes = clockOut > workEnd ? differenceInMinutes(clockOut, workEnd) : 0;
+
                 return {
-                    effectiveStart: minutesToTime(effectiveStartMin),
-                    effectiveEnd: minutesToTime(effectiveEndMin),
+                    effectiveStart: format(effectiveStart, 'HH:mm'),
+                    effectiveEnd: format(effectiveEnd, 'HH:mm'),
                     lunchDuration: lunchBreakMinutes,
                     otherBreaksDuration: otherBreakMinutes,
                     totalWorkingMinutes,
                     regularHours: calculatedHours,
                     overtimeHours,
                     overtimeRate: shift.lateStay.overtimeMultiplier,
-                    overtimePay: overtimeHours * shift.lateStay.overtimeMultiplier,
-                    totalEffectiveHours: calculatedHours + overtimeHours * shift.lateStay.overtimeMultiplier,
+                    overtimePay,
+                    totalEffectiveHours: formatDurationManually(totalWorkingMinutes),
                     // Status calculations
-                    earlyArrival: clockInMin < workStartMin,
-                    earlyArrivalMinutes: clockInMin < workStartMin ? workStartMin - clockInMin : 0,
-                    lateArrival: clockInMin > workStartMin,
-                    lateArrivalMinutes: clockInMin > workStartMin ? clockInMin - workStartMin : 0,
-                    earlyDeparture: clockOutMin < workEndMin,
-                    earlyDepartureMinutes: clockOutMin < workEndMin ? workEndMin - clockOutMin : 0,
-                    lateDeparture: clockOutMin > workEndMin,
-                    lateDepartureMinutes: clockOutMin > workEndMin ? clockOutMin - workEndMin : 0,
-                    isLunchBreakInWindow:
-                        lunchStartMin >= timeToMinutes(shift.lunchBreak.flexWindowStart) &&
-                        lunchEndMin <= timeToMinutes(shift.lunchBreak.flexWindowEnd),
-                    isLunchBreakCorrectDuration: lunchBreakMinutes === shift.lunchBreak.duration,
+                    earlyArrival: clockIn < workStart,
+                    earlyArrivalMinutes,
+                    lateArrival: clockIn > workStart,
+                    lateArrivalMinutes,
+                    earlyDeparture: clockOut < workEnd,
+                    earlyDepartureMinutes,
+                    lateDeparture: clockOut > workEnd,
+                    lateDepartureMinutes,
+                    isLunchBreakInWindow,
+                    isLunchBreakCorrectDuration,
                 };
             },
         }),

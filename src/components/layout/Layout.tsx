@@ -3,8 +3,6 @@ import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { FiClock, FiCalendar, FiMenu, FiX } from 'react-icons/fi';
 import { MdOutlineFactory } from 'react-icons/md';
 
-import useCompanyStore from '../../store/companyStore';
-
 interface Company {
     name: string;
     [key: string]: any;
@@ -19,8 +17,6 @@ interface NavItem {
 const Layout: FC = () => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
     const location = useLocation();
-    const { getCurrentCompany } = useCompanyStore();
-    const currentCompany: Company | undefined = getCurrentCompany();
 
     // Close mobile menu when location changes
     useEffect(() => {
@@ -42,7 +38,6 @@ const Layout: FC = () => {
                         <div className='flex items-center'>
                             <div className='flex-shrink-0'>
                                 <span className='text-primary-600 font-semibold text-xl'>Jotbar</span>
-                                {currentCompany && <p className='text-sm text-neutral-500 mt-1'>{currentCompany.name}</p>}
                             </div>
                         </div>
 

@@ -45,7 +45,6 @@ const AddEditEmployee: React.FC<AddEditEmployeeProps> = ({ isOpen, editingId, is
             lunchStart: parameters.lunchBreak.defaultStart,
             lunchEnd: calculateLunchEnd(parameters.lunchBreak.defaultStart, parameters.lunchBreak.duration),
             breaks: [],
-            calculatedHours: 0,
         }),
         [parameters]
     );

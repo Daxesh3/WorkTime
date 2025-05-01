@@ -107,7 +107,7 @@ const TimeRecordTable_Cells: ITableCell[] = [
     { title: 'Clock In/Out', key: 'clock_in_out' },
     { title: 'Lunch Break', key: 'lunch_break' },
     { title: 'Other Breaks', key: 'other_breaks' },
-    { title: 'Hours', key: 'hours' },
+    { title: 'Company', key: 'company' },
     { title: 'Actions', key: 'actions', style: { width: '120px' } },
 ];
 

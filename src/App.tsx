@@ -3,11 +3,12 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 
 import Layout from './components/layout/Layout';
 import Employee from './pages/Employee/Employee';
-import Calculations from './pages/Calculations';
+import EmployeeDetails from './pages/Calculation/EmployeeDetails';
 import NotFound from './pages/NotFound';
 import Companies from './pages/Company/Companies';
 import ParameterSettings from './pages/ParameterSettings';
 import CompanyDetails from './pages/Company/CompanyDetails';
+import Calculations from './pages/Calculations';
 
 const App: FC = () => {
     return (
@@ -19,6 +20,7 @@ const App: FC = () => {
                 <Route path='parameters' element={<ParameterSettings />} />
                 <Route path='employee' element={<Employee />} />
                 <Route path='calculations' element={<Calculations />} />
+                <Route path='calculations/:userId' element={<EmployeeDetails />} />
                 <Route path='*' element={<NotFound />} />
             </Route>
         </Routes>

@@ -124,7 +124,6 @@ export interface EmployeeRecord {
     company: string;
     shift: ShiftTiming;
     breaks: Break[]; // List of additional breaks
-    calculatedHours: number; // Total calculated hours for the day
 }
 
 export interface Break {

@@ -9,7 +9,6 @@ const CompanyDetails: React.FC = () => {
     const { companies, updateCompany } = useCompanyStore();
 
     const currentCompany = useMemo(() => companies.find((c) => c.id === companyId), [companyId, companies]) || null;
-    console.log(' currentCompany:', currentCompany);
 
     if (!currentCompany || !companyId) {
         return <div>Company not found</div>;
@@ -17,7 +16,6 @@ const CompanyDetails: React.FC = () => {
 
     const handleShiftCreate = async (shift: ShiftTiming) => {
         // Implement shift creation logic
-        console.log('updatedShifts:', currentCompany.shifts);
         const updatedShifts = [...currentCompany.shifts, { ...shift, id: Date.now().toString() }];
         await updateCompany(companyId, { ...currentCompany, shifts: updatedShifts });
     };
@@ -31,7 +29,6 @@ const CompanyDetails: React.FC = () => {
     const handleShiftUpdate = async (updatedShift: ShiftTiming) => {
         // Implement shift update logic
         const updatedShifts = currentCompany.shifts.map((s) => (s.id === updatedShift.id ? updatedShift : s));
-        console.log(' updatedShifts:', updatedShifts);
         await updateCompany(companyId, { ...currentCompany, shifts: updatedShifts });
     };
 

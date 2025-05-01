@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
-import { FaChartBar, FaChartPie, FaCheckCircle, FaClock, FaExclamationCircle, FaTimesCircle } from 'react-icons/fa';
-import Card from '../components/ui/Card';
-import useWorkTimeStore from '../store/workTimeStore';
-import TimePicker from '../components/ui/TimePicker';
-import TitleText from '../components/ui/header';
+import { FaChartPie, FaCheckCircle, FaClock, FaExclamationCircle, FaTimesCircle } from 'react-icons/fa';
+import Card from '../../components/ui/Card';
+import useWorkTimeStore, { CalculationResult } from '../../store/workTimeStore';
+import TimePicker from '../../components/ui/TimePicker';
+import TitleText from '../../components/ui/header';
+import useCompanyStore from '../../store/companyStore';
 
 // Types for simulation record and calculation result
 interface Break {
@@ -21,32 +22,14 @@ interface SimulationRecord {
     breaks: Break[];
 }
 
-interface CalculationResult {
-    effectiveStart: string;
-    effectiveEnd: string;
-    totalWorkingMinutes: number;
-    regularHours: number;
-    overtimeHours: number;
-    overtimePay: number;
-    totalEffectiveHours: number;
-    lunchDuration: number;
-    otherBreaksDuration: number;
-    isLunchBreakInWindow: boolean;
-    isLunchBreakCorrectDuration: boolean;
-    earlyArrival: boolean;
-    earlyArrivalMinutes: number;
-    lateArrival: boolean;
-    lateArrivalMinutes: number;
-    earlyDeparture: boolean;
-    earlyDepartureMinutes: number;
-    lateDeparture: boolean;
-    lateDepartureMinutes: number;
-    // ... add any other fields your simulateCalculation returns
-}
+const EmployeeDetails: React.FC = () => {
+    const { userId } = useParams<{ userId: string }>();
 
-const Calculations: React.FC = () => {
-    const location = useLocation();
-    const { parameters, simulateCalculation } = useWorkTimeStore();
+    const { employeeRecords, simulateCalculation } = useWorkTimeStore();
+    const { getCurrentParameters } = useCompanyStore();
+
+    const user = useMemo(() => employeeRecords.find((c) => c.id === userId), [userId, employeeRecords]) || null;
+    const parameters = getCurrentParameters(user?.company || '', user?.shift?.id || '');
 
     // Sample record for simulation
     const [simulationRecord, setSimulationRecord] = useState<SimulationRecord>({
@@ -62,51 +45,21 @@ const Calculations: React.FC = () => {
 
     // Initialize with pre-filled data if available
     useEffect(() => {
-        if (location.state?.record) {
-            setSimulationRecord(location.state.record);
-            const result = simulateCalculation(location.state.record);
+        if (user) {
+            setSimulationRecord(user);
+            const result = simulateCalculation(user);
             setCalculationResult(result);
         }
-    }, [location.state, parameters, simulateCalculation]);
-
-    // Run calculation simulation
-    const runCalculation = () => {
-        // const result = simulateCalculation(simulationRecord);
-        // setCalculationResult(result);
-    };
+    }, [user, simulateCalculation]);
 
     // Handle updating simulation record fields
-    const handleFieldChange = (field: keyof SimulationRecord, value: string) => {
-        setSimulationRecord((prev) => ({
-            ...prev,
-            [field]: value,
-        }));
-    };
+    const handleFieldChange = (field: keyof SimulationRecord, value: string) => {};
 
     // Handle updating break times
-    const handleBreakChange = (index: number, field: keyof Break, value: string) => {
-        setSimulationRecord((prev) => {
-            const newBreaks = [...prev.breaks];
-            newBreaks[index] = { ...newBreaks[index], [field]: value };
-            return { ...prev, breaks: newBreaks };
-        });
-    };
-
-    // Handle adding a new break
-    const handleAddBreak = () => {
-        setSimulationRecord((prev) => ({
-            ...prev,
-            breaks: [...prev.breaks, { start: '14:00', end: '14:15' }],
-        }));
-    };
+    const handleBreakChange = (index: number, field: keyof Break, value: string) => {};
 
     // Handle removing a break
-    const handleRemoveBreak = (index: number) => {
-        setSimulationRecord((prev) => ({
-            ...prev,
-            breaks: prev.breaks.filter((_, i) => i !== index),
-        }));
-    };
+    const handleRemoveBreak = (index: number) => {};
 
     // Format break time as string
     const formatBreakTime = (minutes: number) => {
@@ -145,16 +98,7 @@ const Calculations: React.FC = () => {
 
             <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
                 <div className='lg:col-span-2'>
-                    <Card
-                        title='Simulation Parameters'
-                        icon={<FaClock size={20} />}
-                        className='animate-fade-in h-full'
-                        actionButton={
-                            <button className='btn btn-primary' onClick={runCalculation}>
-                                Calculate
-                            </button>
-                        }
-                    >
+                    <Card title='Simulation Parameters' icon={<FaClock size={20} />} className='animate-fade-in h-full'>
                         <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
                             <div>
                                 <h3 className='text-md font-medium text-neutral-800 mb-4'>Time Entry</h3>
@@ -165,6 +109,7 @@ const Calculations: React.FC = () => {
                                             className='w-full'
                                             label='Clock In'
                                             value={simulationRecord.clockIn}
+                                            disabled
                                             onChange={(value) => handleFieldChange('clockIn', value)}
                                         />
                                     </div>
@@ -173,6 +118,7 @@ const Calculations: React.FC = () => {
                                             className='w-full'
                                             label='Clock Out'
                                             value={simulationRecord.clockOut}
+                                            disabled
                                             onChange={(value) => handleFieldChange('clockOut', value)}
                                         />
                                     </div>
@@ -183,12 +129,14 @@ const Calculations: React.FC = () => {
                                         className='w-full'
                                         label='Lunch Start'
                                         value={simulationRecord.lunchStart}
+                                        disabled
                                         onChange={(value) => handleFieldChange('lunchStart', value)}
                                     />
                                     <TimePicker
                                         className='w-full'
                                         label='Lunch End'
                                         value={simulationRecord.lunchEnd}
+                                        disabled
                                         onChange={(value) => handleFieldChange('lunchEnd', value)}
                                     />
                                 </div>
@@ -196,12 +144,6 @@ const Calculations: React.FC = () => {
                                 <div className='mb-4'>
                                     <div className='flex items-center justify-between mb-2'>
                                         <label className='input-label'>Additional Breaks</label>
-                                        <button
-                                            className='text-sm text-primary-600 hover:text-primary-800 flex items-center'
-                                            onClick={handleAddBreak}
-                                        >
-                                            + Add Break
-                                        </button>
                                     </div>
 
                                     <div className='space-y-3'>
@@ -214,17 +156,20 @@ const Calculations: React.FC = () => {
                                                     value={breakItem.start}
                                                     onChange={(value) => handleBreakChange(index, 'start', value)}
                                                     className='w-24 text-sm'
+                                                    disabled
                                                 />
                                                 <span className='text-neutral-400'>to</span>
                                                 <TimePicker
                                                     value={breakItem.end}
                                                     onChange={(value) => handleBreakChange(index, 'end', value)}
                                                     className='w-24 text-sm'
+                                                    disabled
                                                 />
                                                 <button
                                                     type='button'
                                                     className='text-error-500 hover:text-error-700 ml-auto'
                                                     onClick={() => handleRemoveBreak(index)}
+                                                    disabled
                                                 >
                                                     ×
                                                 </button>
@@ -239,15 +184,19 @@ const Calculations: React.FC = () => {
 
                                 <div className='bg-neutral-50 p-4 rounded-lg text-sm space-y-2'>
                                     <div className='flex justify-between'>
+                                        <span className='text-neutral-600'>Shift:</span>
+                                        <span className='font-medium first-letter:capitalize'>{parameters.name}</span>
+                                    </div>
+                                    <div className='flex justify-between'>
                                         <span className='text-neutral-600'>Work Hours:</span>
                                         <span className='font-medium'>
-                                            {parameters.workingHours.start} - {parameters.workingHours.end}
+                                            {parameters.start} - {parameters.end}
                                         </span>
                                     </div>
 
                                     <div className='flex justify-between'>
                                         <span className='text-neutral-600'>Required Hours:</span>
-                                        <span className='font-medium'>{parameters.workingHours.totalRequired} hours</span>
+                                        <span className='font-medium'>{8} hours</span>
                                     </div>
 
                                     <div className='flex justify-between'>
@@ -304,7 +253,7 @@ const Calculations: React.FC = () => {
 
                 <div>
                     <Card title='Calculation Results' icon={<FaChartPie size={20} />} className='animate-fade-in h-full'>
-                        {calculationResult ? (
+                        {calculationResult && (
                             <div className='space-y-4'>
                                 <div className='p-3 bg-primary-50 rounded-lg'>
                                     <h4 className='font-medium text-primary-800 mb-2'>Time Summary</h4>
@@ -444,7 +393,7 @@ const Calculations: React.FC = () => {
 
                                     <div className='flex text-xs justify-between'>
                                         <span>0</span>
-                                        <span className='font-medium'>{parameters.workingHours.totalRequired} hours (required)</span>
+                                        <span className='font-medium'>{8} hours (required)</span>
                                     </div>
 
                                     <div className='flex text-xs text-neutral-600 mt-3 space-x-4'>
@@ -460,14 +409,6 @@ const Calculations: React.FC = () => {
                                     </div>
                                 </div>
                             </div>
-                        ) : (
-                            <div className='text-center py-8'>
-                                <FaChartBar className='mx-auto text-neutral-300 text-4xl mb-3' />
-                                <p className='text-neutral-500'>Click "Calculate" to see results</p>
-                                <button className='btn btn-primary mt-4' onClick={runCalculation}>
-                                    Run Calculation
-                                </button>
-                            </div>
                         )}
                     </Card>
                 </div>
@@ -476,4 +417,4 @@ const Calculations: React.FC = () => {
     );
 };
 
-export default Calculations;
+export default EmployeeDetails;

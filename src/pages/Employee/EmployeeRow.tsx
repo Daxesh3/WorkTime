@@ -7,7 +7,6 @@ import { FaCalculator } from 'react-icons/fa';
 
 import { EmployeeRecord } from '../../shared/types';
 import { useNavigate } from 'react-router-dom';
-import { ShiftTiming } from '../Shifts/Shift.types';
 
 interface Props {
     record: EmployeeRecord;
@@ -65,14 +64,15 @@ const EmployeeRow: React.FC<Props> = ({ record, onEdit, onDelete }) => {
                 )}
             </TableCell>
             <TableCell>
-                <div className='text-sm font-medium'>{record.calculatedHours.toFixed(2)} hrs</div>
+                <div className='text-sm font-medium'>{record.company}</div>
+                <div className='text-sm font-medium'>{record.shift.name} shift</div>
             </TableCell>
             <TableCell>
                 <div className='flex justify-center space-x-2'>
                     <button
                         className='text-primary-600 hover:text-primary-800'
                         onClick={() =>
-                            navigate('/calculations', {
+                            navigate(`/calculations/${record.id}`, {
                                 state: {
                                     record: {
                                         clockIn: record.clockIn,
