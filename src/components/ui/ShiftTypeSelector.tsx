@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import useCompanyStore from '../../store/companyStore';
 
-export type ShiftType = 'morning' | 'evening' | 'night' | 'regular';
+export type ShiftType = 'morning' | 'evening' | 'night' | 'regular' | 'hourly' | 'piecework';
 
 interface ShiftTypeSelectorProps {
     value: ShiftType;
@@ -17,6 +17,8 @@ const shiftOptions: { value: ShiftType; label: string }[] = [
     { value: 'morning', label: 'Morning Shift' },
     { value: 'evening', label: 'Evening Shift' },
     { value: 'night', label: 'Night Shift' },
+    { value: 'hourly', label: 'Hourly Work' },
+    { value: 'piecework', label: 'Piecework Work' },
 ];
 
 const ShiftTypeSelector: FC<ShiftTypeSelectorProps> = ({ value, onChange, className = '', disabled = false, label = 'Shift Type', company }) => {

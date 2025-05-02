@@ -6,13 +6,13 @@ import { ShiftTiming } from './Shift.types';
 import { RiEdit2Line } from 'react-icons/ri';
 
 interface Props {
-    id: string;
     index: number;
     shift: ShiftTiming;
+    length: number;
     onEdit: () => void;
     onDelete: () => void;
 }
-const ShiftRow: FC<Props> = ({ id, index, shift, onEdit, onDelete }) => {
+const ShiftRow: FC<Props> = ({ index, shift, length, onEdit, onDelete }) => {
     const formatTime = (time: string) => {
         return new Date(`2000-01-01T${time}`).toLocaleTimeString([], {
             hour: '2-digit',
@@ -37,7 +37,7 @@ const ShiftRow: FC<Props> = ({ id, index, shift, onEdit, onDelete }) => {
     };
 
     return (
-        <Fragment key={id}>
+        <Fragment>
             <TableRow>
                 <TableCell>{index}</TableCell>
                 <TableCell>
@@ -77,7 +77,7 @@ const ShiftRow: FC<Props> = ({ id, index, shift, onEdit, onDelete }) => {
                 <TableCell>
                     <div className='flex justify-center space-x-2'>
                         <RiEdit2Line onClick={onEdit} className='text-primary-600 hover:text-primary-800 cursor-pointer' />
-                        <FiTrash2 onClick={onDelete} className='text-error-600 hover:text-error-800 cursor-pointer' />
+                        {length > 1 && <FiTrash2 onClick={onDelete} className='text-error-600 hover:text-error-800 cursor-pointer' />}
                     </div>
                 </TableCell>
             </TableRow>

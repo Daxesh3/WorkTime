@@ -6,7 +6,7 @@ import { ShiftTiming } from '../pages/Shifts/Shift.types';
 // Define the store state and actions
 interface CompanyStore {
     companies: Company[];
-    addCompany: (company: Omit<Company, 'id' | 'createdAt' | 'updatedAt' | 'shifts'>) => void;
+    addCompany: (company: Omit<Company, 'id' | 'createdAt' | 'updatedAt'>) => void;
     updateCompany: (id: string, updates: Partial<Company>) => void;
     deleteCompany: (id: string) => void;
     getCurrentCompany: (id: string) => Company | undefined;
@@ -23,8 +23,7 @@ const useCompanyStore = create<CompanyStore>()(
                 const newCompany: Company = {
                     id: Date.now().toString(),
                     name: company.name,
-                    shifts: [],
-                    parameters: company.parameters,
+                    shifts: company.shifts,
                     createdAt: new Date(),
                     updatedAt: new Date(),
                 };

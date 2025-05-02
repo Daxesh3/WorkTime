@@ -4,8 +4,13 @@ import TimePicker from '../components/ui/TimePicker';
 import TimeSlider from '../components/ui/TimeSlider';
 import Card from '../components/ui/Card';
 import useWorkTimeStore from '../store/workTimeStore';
-import { CompanyParameters } from '../shared/types';
-
+import { EarlyArrival, LateStay, LunchBreak, WorkingHours } from '../shared/types';
+export interface CompanyParameters {
+    workingHours: WorkingHours;
+    lunchBreak: LunchBreak;
+    earlyArrival: EarlyArrival;
+    lateStay: LateStay;
+}
 const ParameterSettings: React.FC = () => {
     const { parameters, updateParameters } = useWorkTimeStore();
 

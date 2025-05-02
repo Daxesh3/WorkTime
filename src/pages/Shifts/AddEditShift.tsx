@@ -1,5 +1,6 @@
 import React from 'react';
 import { FiSun, FiCoffee, FiClock } from 'react-icons/fi';
+import { GiMoneyStack } from 'react-icons/gi';
 
 import Modal from '../../components/ui/Modal';
 import TimePicker from '../../components/ui/TimePicker';
@@ -12,10 +13,43 @@ interface AddEditCompanyModalProps {
     editingShift: ShiftTiming | null;
     onClose: () => void;
     onSave: () => void;
-    updateEditingShift: (field: keyof ShiftTiming, value: any, subField?: string) => void;
+    setEditingShift: React.Dispatch<React.SetStateAction<ShiftTiming | null>>;
 }
 
-const AddEditShift: React.FC<AddEditCompanyModalProps> = ({ isOpen, editingShift, onClose, onSave, updateEditingShift }) => {
+const AddEditShift: React.FC<AddEditCompanyModalProps> = ({ isOpen, editingShift, onClose, onSave, setEditingShift }) => {
+    const updateEditingShift = (field: keyof ShiftTiming, value: any, subField?: any) => {
+        setEditingShift((prev) => {
+            if (!prev) return null;
+
+            if (subField && typeof prev[field] === 'object') {
+                return {
+                    ...prev,
+                    [field]: {
+                        ...(prev[field] as any),
+                        [subField]: value,
+                    },
+                };
+            }
+            let defaultValue;
+            if (field === 'name') {
+                if (value === 'hourly' || value === 'piecework') {
+                    defaultValue = defaultData.hourly;
+                } else if (value === 'morning') {
+                    defaultValue = defaultData.morning;
+                } else if (value === 'evening') {
+                    defaultValue = defaultData.evening;
+                } else if (value === 'night') {
+                    defaultValue = defaultData.night;
+                }
+            }
+            return {
+                ...prev,
+                ...defaultValue,
+                [field]: value,
+            };
+        });
+    };
+
     return (
         <Modal
             isOpen={isOpen}
@@ -50,6 +84,29 @@ const AddEditShift: React.FC<AddEditCompanyModalProps> = ({ isOpen, editingShift
                     </div>
                 </Card>
 
+                <Card title='Shift Bonus' icon={<GiMoneyStack size={22} />}>
+                    <div className='flex items-center'>
+                        <input
+                            type='checkbox'
+                            checked={editingShift?.shiftBonus?.isShiftBonus || false}
+                            onChange={(e) => updateEditingShift('shiftBonus', e.target.checked, 'isShiftBonus')}
+                            className='h-4 w-4 text-primary-600 focus:ring-primary-500 border-neutral-300 rounded'
+                        />
+
+                        <label className='ml-2 text-sm text-neutral-700 first-letter:capitalize'>{editingShift?.name} Shift Bonus</label>
+                    </div>
+                    {editingShift?.shiftBonus?.isShiftBonus && (
+                        <div className='grid grid-cols-5 gap-4'>
+                            <input
+                                type='number'
+                                value={editingShift?.shiftBonus.bonusAmount || 60}
+                                onChange={(e) => updateEditingShift('shiftBonus', parseInt(e.target.value), 'bonusAmount')}
+                                className='time-input mt-2'
+                            />
+                        </div>
+                    )}
+                </Card>
+
                 <Card title='Break Duration' icon={<FiCoffee />}>
                     <div className='grid grid-cols-2 gap-4'>
                         <div>
@@ -66,9 +123,6 @@ const AddEditShift: React.FC<AddEditCompanyModalProps> = ({ isOpen, editingShift
                                 value={editingShift?.lunchBreak.duration || 60}
                                 onChange={(e) => updateEditingShift('lunchBreak', parseInt(e.target.value), 'duration')}
                                 className='time-input'
-                                min='15'
-                                max='120'
-                                step='15'
                             />
                         </div>
                         <div>
@@ -154,6 +208,43 @@ const AddEditShift: React.FC<AddEditCompanyModalProps> = ({ isOpen, editingShift
             </div>
         </Modal>
     );
+};
+
+let defaultData = {
+    hourly: {
+        start: '09:00',
+        end: '10:00',
+    },
+    morning: {
+        start: '06:00',
+        end: '14:00',
+        lunchBreak: {
+            defaultStart: '12:00',
+            duration: 60,
+            flexWindowStart: '11:30',
+            flexWindowEnd: '13:30',
+        },
+    },
+    evening: {
+        start: '14:00',
+        end: '22:00',
+        lunchBreak: {
+            defaultStart: '18:00',
+            duration: 60,
+            flexWindowStart: '17:30',
+            flexWindowEnd: '19:30',
+        },
+    },
+    night: {
+        start: '22:00',
+        end: '06:00',
+        lunchBreak: {
+            defaultStart: '02:00',
+            duration: 60,
+            flexWindowStart: '01:30',
+            flexWindowEnd: '03:30',
+        },
+    },
 };
 
 export default AddEditShift;

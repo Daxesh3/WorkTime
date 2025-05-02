@@ -7,6 +7,7 @@ import useWorkTimeStore, { CalculationResult } from '../../store/workTimeStore';
 import TimePicker from '../../components/ui/TimePicker';
 import TitleText from '../../components/ui/header';
 import useCompanyStore from '../../store/companyStore';
+import { GiMoneyStack } from 'react-icons/gi';
 
 // Types for simulation record and calculation result
 interface Break {
@@ -30,6 +31,7 @@ const EmployeeDetails: React.FC = () => {
 
     const user = useMemo(() => employeeRecords.find((c) => c.id === userId), [userId, employeeRecords]) || null;
     const parameters = getCurrentParameters(user?.company || '', user?.shift?.id || '');
+    console.log(' parameters:', parameters);
 
     // Sample record for simulation
     const [simulationRecord, setSimulationRecord] = useState<SimulationRecord>({
@@ -185,7 +187,15 @@ const EmployeeDetails: React.FC = () => {
                                 <div className='bg-neutral-50 p-4 rounded-lg text-sm space-y-2'>
                                     <div className='flex justify-between'>
                                         <span className='text-neutral-600'>Shift:</span>
-                                        <span className='font-medium first-letter:capitalize'>{parameters.name}</span>
+                                        <div className='flex items-center'>
+                                            <span className='font-medium first-letter:capitalize'>{parameters.name} </span>
+                                            {parameters.shiftBonus?.isShiftBonus && (
+                                                <div className='flex items-center font-medium ml-1'>
+                                                    (<GiMoneyStack className='text-green-600 mr-1' size={20} />{' '}
+                                                    {parameters.shiftBonus?.bonusAmount || 0})
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                     <div className='flex justify-between'>
                                         <span className='text-neutral-600'>Work Hours:</span>
@@ -196,7 +206,7 @@ const EmployeeDetails: React.FC = () => {
 
                                     <div className='flex justify-between'>
                                         <span className='text-neutral-600'>Required Hours:</span>
-                                        <span className='font-medium'>{8} hours</span>
+                                        <span className='font-medium'>{calculationResult?.regularHours} hours</span>
                                     </div>
 
                                     <div className='flex justify-between'>
@@ -276,8 +286,9 @@ const EmployeeDetails: React.FC = () => {
                                         </div>
                                         <div className='flex justify-between'>
                                             <span className='text-neutral-600'>Overtime Hours:</span>
-                                            <span className='font-medium'>{calculationResult.overtimeHours}</span>
+                                            <span className='font-medium'>{calculationResult.overtimeHours.toFixed(2)}</span>
                                         </div>
+
                                         <div className='flex justify-between'>
                                             <span className='text-neutral-600'>Overtime Pay:</span>
                                             <span className='font-medium'>{calculationResult.overtimePay}× hours</span>
@@ -286,6 +297,14 @@ const EmployeeDetails: React.FC = () => {
                                             <span>Total Effective:</span>
                                             <span>{calculationResult.totalEffectiveHours} hours</span>
                                         </div>
+                                        {parameters.shiftBonus?.isShiftBonus && (
+                                            <div className='flex justify-between font-semibold'>
+                                                <span className='text-neutral-600'>Shift Bonus:</span>
+                                                <span className='flex gap-1 items-center'>
+                                                    <GiMoneyStack className='text-green-600' size={20} /> {parameters.shiftBonus?.bonusAmount || 0}
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 

@@ -24,27 +24,6 @@ const ShiftManagement: React.FC<ShiftManagementProps> = ({ companyName, shifts, 
         setIsModalOpen(false);
     };
 
-    const updateEditingShift = (field: keyof ShiftTiming, value: any, subField?: string) => {
-        setEditingShift((prev) => {
-            if (!prev) return null;
-
-            if (subField && typeof prev[field] === 'object') {
-                return {
-                    ...prev,
-                    [field]: {
-                        ...prev[field],
-                        [subField]: value,
-                    },
-                };
-            }
-
-            return {
-                ...prev,
-                [field]: value,
-            };
-        });
-    };
-
     const handleSaveShift = async () => {
         if (!editingShift) return;
 
@@ -100,8 +79,9 @@ const ShiftManagement: React.FC<ShiftManagementProps> = ({ companyName, shifts, 
                             shifts.map((shift, index) => {
                                 return (
                                     <ShiftRow
-                                        id={shift.id || ''}
+                                        key={shift.id}
                                         shift={shift}
+                                        length={shifts.length}
                                         index={index + 1}
                                         onEdit={() => handleOpenModal(shift)}
                                         onDelete={() => handleDeleteShift(shift.id!)}
@@ -117,7 +97,7 @@ const ShiftManagement: React.FC<ShiftManagementProps> = ({ companyName, shifts, 
                     editingShift={editingShift}
                     onClose={handleCloseModal}
                     onSave={handleSaveShift}
-                    updateEditingShift={updateEditingShift}
+                    setEditingShift={setEditingShift}
                 />
             )}
         </>
@@ -133,6 +113,10 @@ const defaultShift: ShiftTiming = {
         duration: 60,
         flexWindowStart: '11:30',
         flexWindowEnd: '13:30',
+    },
+    shiftBonus: {
+        isShiftBonus: false,
+        bonusAmount: 0,
     },
     earlyArrival: {
         maxMinutes: 30,

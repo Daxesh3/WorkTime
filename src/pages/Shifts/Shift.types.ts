@@ -1,6 +1,8 @@
+import { ShiftType } from '../../components/ui/ShiftTypeSelector';
+
 export interface ShiftTiming {
     id?: string;
-    name: 'morning' | 'evening' | 'night' | 'regular';
+    name: ShiftType;
     start: string;
     end: string;
     lunchBreak: {
@@ -8,6 +10,10 @@ export interface ShiftTiming {
         duration: number;
         flexWindowStart: string;
         flexWindowEnd: string;
+    };
+    shiftBonus: {
+        isShiftBonus: boolean;
+        bonusAmount: number;
     };
     earlyArrival: {
         maxMinutes: number;

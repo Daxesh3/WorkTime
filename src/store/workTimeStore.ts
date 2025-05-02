@@ -399,7 +399,7 @@ const useWorkTimeStore = create<WorkTimeStore>()(
                     lunchDuration: lunchBreakMinutes,
                     otherBreaksDuration: otherBreakMinutes,
                     totalWorkingMinutes,
-                    regularHours: calculatedHours,
+                    regularHours: formatDurationManually(differenceInMinutes(workEnd, workStart) - shift.lunchBreak.duration),
                     overtimeHours,
                     overtimeRate: shift.lateStay.overtimeMultiplier,
                     overtimePay,

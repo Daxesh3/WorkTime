@@ -10,15 +10,16 @@ import TableComponent from '../../components/table/table';
 import TableBody from '../../components/table/tableBody';
 import CompanyRow from './CompanyRow';
 import TitleText from '../../components/ui/header';
+import { ShiftTiming } from '../Shifts/Shift.types';
 
 const Companies: React.FC = () => {
     const { companies, addCompany, updateCompany, deleteCompany } = useCompanyStore();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingCompany, setEditingCompany] = useState<Company | null>(null);
 
-    const handleSave = (company: { name: string; parameters: Company['parameters'] }) => {
+    const handleSave = (company: { name: string; shifts: ShiftTiming[] }) => {
         if (editingCompany) {
-            updateCompany(editingCompany.id, { ...editingCompany, ...company });
+            updateCompany(editingCompany.id, { ...editingCompany, name: company.name });
         } else {
             addCompany({ ...company });
         }
@@ -75,7 +76,7 @@ const Companies: React.FC = () => {
                     isOpen={isModalOpen}
                     onClose={() => setIsModalOpen(false)}
                     onSave={handleSave}
-                    initialData={editingCompany ? { name: editingCompany.name, parameters: editingCompany.parameters } : undefined}
+                    initialData={editingCompany ? { name: editingCompany.name } : undefined}
                 />
             )}
         </>

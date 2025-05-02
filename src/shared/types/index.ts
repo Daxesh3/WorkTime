@@ -70,17 +70,9 @@ export interface LateStay {
     overtimeMultiplier: number;
 }
 
-export interface CompanyParameters {
-    workingHours: WorkingHours;
-    lunchBreak: LunchBreak;
-    earlyArrival: EarlyArrival;
-    lateStay: LateStay;
-}
-
 export interface Company {
     id: string;
     name: string;
-    parameters: CompanyParameters;
     shifts: ShiftTiming[];
     createdAt: Date;
     updatedAt: Date;
@@ -101,16 +93,6 @@ export interface WorkTimeRecord {
     notes?: string;
     createdAt: Date;
     updatedAt: Date;
-}
-
-export interface CalculationResult {
-    effectiveHours: number;
-    regularHours: number;
-    overtime: number;
-    deductions: number;
-    totalHours: number;
-    isComplete: boolean;
-    notes: string[];
 }
 
 export interface EmployeeRecord {
