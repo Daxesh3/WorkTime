@@ -31,7 +31,6 @@ const EmployeeDetails: React.FC = () => {
 
     const user = useMemo(() => employeeRecords.find((c) => c.id === userId), [userId, employeeRecords]) || null;
     const parameters = getCurrentParameters(user?.company || '', user?.shift?.id || '');
-    console.log(' parameters:', parameters);
 
     // Sample record for simulation
     const [simulationRecord, setSimulationRecord] = useState<SimulationRecord>({
@@ -47,12 +46,12 @@ const EmployeeDetails: React.FC = () => {
 
     // Initialize with pre-filled data if available
     useEffect(() => {
-        if (user) {
+        if (user && parameters) {
             setSimulationRecord(user);
-            const result = simulateCalculation(user);
+            const result = simulateCalculation(user, parameters);
             setCalculationResult(result);
         }
-    }, [user, simulateCalculation]);
+    }, [user, parameters, simulateCalculation]);
 
     // Handle updating simulation record fields
     const handleFieldChange = (field: keyof SimulationRecord, value: string) => {};

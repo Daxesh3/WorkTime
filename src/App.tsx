@@ -19,8 +19,8 @@ const App: FC = () => {
                 <Route path='companies/:companyId' element={<CompanyDetails />} />
                 <Route path='parameters' element={<ParameterSettings />} />
                 <Route path='employee' element={<Employee />} />
-                <Route path='calculations' element={<Calculations />} />
                 <Route path='calculations/:userId' element={<EmployeeDetails />} />
+                <Route path='calculations' element={<Calculations />} />
                 <Route path='*' element={<NotFound />} />
             </Route>
         </Routes>
