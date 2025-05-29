@@ -17,6 +17,7 @@ export const defaultParameters: ShiftTiming = {
     name: 'regular',
     start: '08:00',
     end: '17:00',
+    id: new Date().getTime().toString(),
     // totalRequired: 8,
     lunchBreak: {
         defaultStart: '12:00',
