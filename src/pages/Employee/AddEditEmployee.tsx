@@ -26,6 +26,7 @@ interface AddEditEmployeeProps {
   isOpen: boolean;
   isAddingRecord: boolean;
   onClose: () => void;
+  editingDateId: string | null;
 }
 
 // Helper function outside the component
@@ -45,6 +46,7 @@ const AddEditEmployee: React.FC<AddEditEmployeeProps> = ({
   editingId,
   isAddingRecord,
   onClose,
+  editingDateId,
 }) => {
   const { companies } = useCompanyStore();
   const {
@@ -60,7 +62,7 @@ const AddEditEmployee: React.FC<AddEditEmployeeProps> = ({
       name: "",
       shift: companies[0]?.shifts[0] || ({} as ShiftTiming),
       company: companies[0]?.name || "",
-      date: format(new Date(), "yyyy-MM-dd"),
+      date: format(new Date(editingDateId || ""), "yyyy-MM-dd"),
       clockIn: parameters.workingHours.start,
       clockOut: parameters.workingHours.end,
       lunchStart: parameters.lunchBreak.defaultStart,
@@ -73,12 +75,14 @@ const AddEditEmployee: React.FC<AddEditEmployeeProps> = ({
     [parameters]
   );
 
-  const editedRecord = useMemo(
-    () => employeeRecords.find((r) => r.id === editingId),
-    [employeeRecords, editingId]
-  );
+  const editedRecord = useMemo(() => {
+    const employee = employeeRecords.filter((r) => r.id === editingId);
+    initialRecord.name = employee[0].name;
+    return employee.find((r) => r.dateId === editingDateId);
+  }, [employeeRecords, editingId, editingDateId]);
+
   const [newRecord, setNewRecord] = useState<EmployeeRecord>(
-    isAddingRecord ? initialRecord : editedRecord!
+    isAddingRecord ? initialRecord : (editedRecord || initialRecord)!
   );
 
   const handleFieldChange = (field: keyof EmployeeRecord, value: any) => {
@@ -157,10 +161,10 @@ const AddEditEmployee: React.FC<AddEditEmployeeProps> = ({
   };
 
   const handleAddRecord = () => {
-    if (isAddingRecord) {
+    if (!editedRecord || isAddingRecord) {
       addEmployeeRecord(newRecord);
     } else {
-      updateEmployeeRecord(editedRecord!.id, newRecord);
+      updateEmployeeRecord(editedRecord!.id, editedRecord!.dateId, newRecord);
     }
     onClose();
   };
@@ -186,18 +190,28 @@ const AddEditEmployee: React.FC<AddEditEmployeeProps> = ({
       <div className="space-y-4">
         <Card title="Basic Information" icon={<FiUser size={20} />}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {isAddingRecord && (
-              <div>
-                <label className="input-label">Employee Name</label>
-                <input
-                  type="text"
-                  value={newRecord.name}
-                  onChange={(e) => handleFieldChange("name", e.target.value)}
-                  className="time-input w-full"
-                  placeholder="Enter employee name"
-                />
-              </div>
-            )}
+            {/* {isAddingRecord && ( */}
+            <div>
+              <label className="input-label">Employee Name</label>
+              <input
+                disabled={!isAddingRecord}
+                type="text"
+                value={newRecord.name}
+                onChange={(e) => handleFieldChange("name", e.target.value)}
+                className="time-input w-full"
+                placeholder="Enter employee name"
+              />
+            </div>
+            {/* )} */}
+            <div>
+              <label className="input-label">Date</label>
+              <input
+                type="date"
+                value={newRecord.date}
+                onChange={(e) => handleFieldChange("date", e.target.value)}
+                className="time-input w-full"
+              />
+            </div>
             <CompanySelector
               value={newRecord.company}
               onChange={(value) => handleCompanyOrShiftChange("company", value)}
