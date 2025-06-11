@@ -62,7 +62,9 @@ const AddEditEmployee: React.FC<AddEditEmployeeProps> = ({
       name: "",
       shift: companies[0]?.shifts[0] || ({} as ShiftTiming),
       company: companies[0]?.name || "",
-      date: format(new Date(editingDateId || ""), "yyyy-MM-dd"),
+      date: editingDateId
+        ? format(new Date(editingDateId), "yyyy-MM-dd")
+        : format(new Date(), "yyyy-MM-dd"),
       clockIn: parameters.workingHours.start,
       clockOut: parameters.workingHours.end,
       lunchStart: parameters.lunchBreak.defaultStart,
@@ -72,11 +74,13 @@ const AddEditEmployee: React.FC<AddEditEmployeeProps> = ({
       ),
       breaks: [],
     }),
-    [parameters]
+    [parameters, editingDateId]
   );
 
   const editedRecord = useMemo(() => {
+    if (!editingId || !editingDateId) return null;
     const employee = employeeRecords.filter((r) => r.id === editingId);
+    if (employee.length === 0) return null;
     initialRecord.name = employee[0].name;
     return employee.find((r) => r.dateId === editingDateId);
   }, [employeeRecords, editingId, editingDateId]);
@@ -163,8 +167,8 @@ const AddEditEmployee: React.FC<AddEditEmployeeProps> = ({
   const handleAddRecord = () => {
     if (!editedRecord || isAddingRecord) {
       addEmployeeRecord(newRecord);
-    } else {
-      updateEmployeeRecord(editedRecord!.id, editedRecord!.dateId, newRecord);
+    } else if (editedRecord.dateId) {
+      updateEmployeeRecord(editedRecord.id, editedRecord.dateId, newRecord);
     }
     onClose();
   };

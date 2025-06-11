@@ -64,6 +64,7 @@ const EmployeeSchedule: React.FC = () => {
           name: record.name,
           dailyHours: Array(7).fill({ hours: "0:00" }),
           totalHours: "0:00",
+          dateId: record.date,
         });
       }
 
