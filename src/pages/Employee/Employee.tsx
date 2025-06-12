@@ -260,17 +260,62 @@ const EmployeeSchedule: React.FC = () => {
         }}
         dailyRecords={
           selectedEmployeeData
-            ? selectedEmployeeData.dailyHours.map((day, index) => ({
-                date: format(weekDays[index], "MMM dd, yyyy"),
-                clockIn: "00:00", // These would need to come from your actual data
-                clockOut: "00:00",
-                lunchStart: "00:00",
-                lunchEnd: "00:00",
-                breaks: [],
-                totalHours:
-                  parseFloat(day.hours.split(":")[0]) +
-                  parseFloat(day.hours.split(":")[1]) / 60,
-              }))
+            ? weekDays.map((day) => {
+                const record = filteredRecords.find(
+                  (r) =>
+                    r.id === selectedEmployeeData.id &&
+                    r.date === format(day, "yyyy-MM-dd")
+                );
+                if (!record) {
+                  return {
+                    date: format(day, "MMM dd, yyyy"),
+                    clockIn: "-",
+                    clockOut: "-",
+                    lunchStart: "-",
+                    lunchEnd: "-",
+                    breaks: [],
+                    totalHours: 0,
+                  };
+                }
+                return {
+                  date: format(day, "MMM dd, yyyy"),
+                  clockIn: record.clockIn,
+                  clockOut: record.clockOut,
+                  lunchStart: record.lunchStart,
+                  lunchEnd: record.lunchEnd,
+                  breaks: record.breaks,
+                  totalHours: (() => {
+                    const clockIn = new Date(`2000-01-01T${record.clockIn}`);
+                    const clockOut = new Date(`2000-01-01T${record.clockOut}`);
+                    const lunchStart = new Date(
+                      `2000-01-01T${record.lunchStart}`
+                    );
+                    const lunchEnd = new Date(`2000-01-01T${record.lunchEnd}`);
+                    const breakMinutes = record.breaks.reduce(
+                      (total, breakItem) => {
+                        const breakStart = new Date(
+                          `2000-01-01T${breakItem.start}`
+                        );
+                        const breakEnd = new Date(
+                          `2000-01-01T${breakItem.end}`
+                        );
+                        return (
+                          total +
+                          (breakEnd.getTime() - breakStart.getTime()) /
+                            (1000 * 60)
+                        );
+                      },
+                      0
+                    );
+                    const totalMinutes =
+                      (clockOut.getTime() - clockIn.getTime()) / (1000 * 60) -
+                      (lunchEnd.getTime() - lunchStart.getTime()) /
+                        (1000 * 60) -
+                      breakMinutes;
+                    return totalMinutes / 60;
+                  })(),
+                };
+              })
             : []
         }
         weeklyTotal={
