@@ -307,8 +307,8 @@ const EmployeeSchedule: React.FC = () => {
                     date: format(day, "MMM dd, yyyy"),
                     clockIn: "-",
                     clockOut: "-",
-                    lunchStart: "-",
-                    lunchEnd: "-",
+                    lunchStart: "",
+                    lunchEnd: "",
                     breaks: [],
                     totalHours: 0,
                   };

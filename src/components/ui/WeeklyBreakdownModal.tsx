@@ -67,67 +67,98 @@ const WeeklyBreakdownModal: React.FC<WeeklyBreakdownModalProps> = ({
       onClose={onClose}
       title="Weekly Breakdown"
     >
-      <div className="overflow-x-auto">
-        <table className="min-w-full">
-          <thead>
-            <tr className="border-b border-neutral-200">
-              <th className="text-left py-2 px-4 text-sm font-medium text-neutral-600">
+      <div className="overflow-x-auto rounded-lg border border-neutral-200 bg-white shadow-sm">
+        <table className="min-w-full divide-y divide-neutral-200">
+          <thead className="bg-neutral-50">
+            <tr>
+              <th
+                scope="col"
+                className="py-3.5 px-4 text-left text-sm font-semibold text-neutral-900"
+              >
                 Day
               </th>
-              <th className="text-left py-2 px-4 text-sm font-medium text-neutral-600">
+              <th
+                scope="col"
+                className="py-3.5 px-4 text-left text-sm font-semibold text-neutral-900"
+              >
                 In
               </th>
-              <th className="text-left py-2 px-4 text-sm font-medium text-neutral-600">
+              <th
+                scope="col"
+                className="py-3.5 px-4 text-left text-sm font-semibold text-neutral-900"
+              >
                 Out
               </th>
-              <th className="text-left py-2 px-4 text-sm font-medium text-neutral-600">
+              <th
+                scope="col"
+                className="py-3.5 px-4 text-left text-sm font-semibold text-neutral-900"
+              >
                 Lunch
               </th>
-              <th className="text-left py-2 px-4 text-sm font-medium text-neutral-600">
+              <th
+                scope="col"
+                className="py-3.5 px-4 text-left text-sm font-semibold text-neutral-900"
+              >
                 Breaks
               </th>
-              <th className="text-left py-2 px-4 text-sm font-medium text-neutral-600">
+              <th
+                scope="col"
+                className="py-3.5 px-4 text-left text-sm font-semibold text-neutral-900"
+              >
                 Total
               </th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-neutral-200 bg-white">
             {dailyRecords.map((record, index) => (
-              <tr key={index} className="border-b border-neutral-100">
-                <td className="py-2 px-4 text-sm text-neutral-600">
+              <tr key={index} className="transition-colors hover:bg-neutral-50">
+                <td className="whitespace-nowrap py-2 px-4 text-sm text-neutral-600">
                   {record.date}
                 </td>
-                <td className="py-2 px-4 text-sm text-neutral-600">
+                <td className="whitespace-nowrap py-2 px-4 text-sm text-neutral-600">
                   {formatTime(record.clockIn)}
                 </td>
-                <td className="py-2 px-4 text-sm text-neutral-600">
+                <td className="whitespace-nowrap py-2 px-4 text-sm text-neutral-600">
                   {formatTime(record.clockOut)}
                 </td>
-                <td className="py-2 px-4 text-sm text-neutral-600">
-                  {formatTime(record.lunchStart)} -{" "}
-                  {formatTime(record.lunchEnd)}
+                <td className="whitespace-nowrap py-2 px-4 text-sm text-neutral-600">
+                  <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                    {formatTime(record.lunchStart)} -{" "}
+                    {formatTime(record.lunchEnd)}
+                  </span>
                 </td>
-                <td className="py-2 px-4 text-sm text-neutral-600">
-                  {formatDuration(
-                    calculateLunchDuration(record.lunchStart, record.lunchEnd)
-                  )}
+                <td className="whitespace-nowrap py-2 px-4 text-sm text-neutral-600">
+                  <span className="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
+                    {record.lunchStart
+                      ? formatDuration(
+                          calculateLunchDuration(
+                            record.lunchStart,
+                            record.lunchEnd
+                          )
+                        )
+                      : "-"}
+                  </span>
                 </td>
-                <td className="py-2 px-4 text-sm font-medium text-neutral-800">
-                  {formatTotalHours(record.totalHours)} h
+                <td className="whitespace-nowrap py-2 px-4 text-sm font-medium text-neutral-900">
+                  <span className="inline-flex items-center rounded-md bg-primary-50 px-2 py-1 text-xs font-medium text-primary-700 ring-1 ring-inset ring-primary-700/10">
+                    {formatTotalHours(record.totalHours)} h
+                  </span>
                 </td>
               </tr>
             ))}
           </tbody>
-          <tfoot>
-            <tr className="border-t border-neutral-200">
+          <tfoot className="bg-neutral-50">
+            <tr>
               <td
                 colSpan={5}
-                className="py-2 px-4 text-sm font-medium text-neutral-600 text-right"
+                className="py-2 px-4 text-right text-sm font-semibold text-neutral-900"
               >
                 Weekly Total:
               </td>
-              <td className="py-2 px-4 text-sm font-medium text-neutral-800">
-                {formatTotalHours(weeklyTotal)} h
+              <td className="py-2 px-4 text-sm font-semibold text-neutral-900">
+                <span className="inline-flex items-center rounded-md bg-primary-100 px-2.5 py-1 text-sm font-medium text-primary-700 ring-1 ring-inset ring-primary-700/10">
+                  {formatTotalHours(weeklyTotal)} h
+                </span>
               </td>
             </tr>
           </tfoot>
