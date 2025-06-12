@@ -49,6 +49,7 @@ const EmployeeDetails: React.FC = () => {
         if (user && parameters) {
             setSimulationRecord(user);
             const result = simulateCalculation(user, parameters);
+            console.log(' result:', result);
             setCalculationResult(result);
         }
     }, [user, parameters, simulateCalculation]);
