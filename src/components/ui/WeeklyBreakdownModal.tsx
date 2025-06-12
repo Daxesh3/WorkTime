@@ -41,10 +41,23 @@ const WeeklyBreakdownModal: React.FC<WeeklyBreakdownModalProps> = ({
     }, 0);
   };
 
+  const calculateLunchDuration = (lunchStart: string, lunchEnd: string) => {
+    if (lunchStart === "-" || lunchEnd === "-") return 0;
+    const start = new Date(`2000-01-01T${lunchStart}`);
+    const end = new Date(`2000-01-01T${lunchEnd}`);
+    return (end.getTime() - start.getTime()) / (1000 * 60);
+  };
+
   const formatDuration = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
     return `${hours}:${mins.toString().padStart(2, "0")}`;
+  };
+
+  const formatTotalHours = (decimalHours: number) => {
+    const hours = Math.floor(decimalHours);
+    const minutes = Math.round((decimalHours - hours) * 60);
+    return `${hours}:${minutes.toString().padStart(2, "0")}`;
   };
 
   return (
@@ -95,10 +108,12 @@ const WeeklyBreakdownModal: React.FC<WeeklyBreakdownModalProps> = ({
                   {formatTime(record.lunchEnd)}
                 </td>
                 <td className="py-2 px-4 text-sm text-neutral-600">
-                  {formatDuration(calculateBreakDuration(record.breaks))}
+                  {formatDuration(
+                    calculateLunchDuration(record.lunchStart, record.lunchEnd)
+                  )}
                 </td>
                 <td className="py-2 px-4 text-sm font-medium text-neutral-800">
-                  {record.totalHours.toFixed(2)}h
+                  {formatTotalHours(record.totalHours)} h
                 </td>
               </tr>
             ))}
@@ -112,7 +127,7 @@ const WeeklyBreakdownModal: React.FC<WeeklyBreakdownModalProps> = ({
                 Weekly Total:
               </td>
               <td className="py-2 px-4 text-sm font-medium text-neutral-800">
-                {weeklyTotal.toFixed(2)}h
+                {formatTotalHours(weeklyTotal)} h
               </td>
             </tr>
           </tfoot>
