@@ -320,8 +320,35 @@ const EmployeeSchedule: React.FC = () => {
         }
         weeklyTotal={
           selectedEmployeeData
-            ? parseFloat(selectedEmployeeData.totalHours.split(":")[0]) +
-              parseFloat(selectedEmployeeData.totalHours.split(":")[1]) / 60
+            ? filteredRecords
+                .filter((record) => record.id === selectedEmployeeData.id)
+                .reduce((total, record) => {
+                  const clockIn = new Date(`2000-01-01T${record.clockIn}`);
+                  const clockOut = new Date(`2000-01-01T${record.clockOut}`);
+                  const lunchStart = new Date(
+                    `2000-01-01T${record.lunchStart}`
+                  );
+                  const lunchEnd = new Date(`2000-01-01T${record.lunchEnd}`);
+                  const breakMinutes = record.breaks.reduce(
+                    (total, breakItem) => {
+                      const breakStart = new Date(
+                        `2000-01-01T${breakItem.start}`
+                      );
+                      const breakEnd = new Date(`2000-01-01T${breakItem.end}`);
+                      return (
+                        total +
+                        (breakEnd.getTime() - breakStart.getTime()) /
+                          (1000 * 60)
+                      );
+                    },
+                    0
+                  );
+                  const totalMinutes =
+                    (clockOut.getTime() - clockIn.getTime()) / (1000 * 60) -
+                    (lunchEnd.getTime() - lunchStart.getTime()) / (1000 * 60) -
+                    breakMinutes;
+                  return total + totalMinutes / 60;
+                }, 0)
             : 0
         }
       />
