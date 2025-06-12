@@ -15,6 +15,7 @@ import Card from "../../components/ui/Card";
 import useWorkTimeStore from "../../store/workTimeStore";
 import AddEditEmployee from "./AddEditEmployee";
 import TitleText from "../../components/ui/header";
+import WeeklyBreakdownModal from "../../components/ui/WeeklyBreakdownModal";
 
 interface TimeCell {
   hours: string;
@@ -35,6 +36,9 @@ const EmployeeSchedule: React.FC = () => {
   const [editingDateId, setEditingDateId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [isBreakdownModalOpen, setIsBreakdownModalOpen] = useState(false);
+  const [selectedEmployeeData, setSelectedEmployeeData] =
+    useState<EmployeeWeeklyData | null>(null);
 
   // Calculate the start and end of the week
   const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 });
@@ -198,7 +202,13 @@ const EmployeeSchedule: React.FC = () => {
                       </div>
                     </td>
                   ))}
-                  <td className="px-4 py-2 border-b border-neutral-200 bg-blue-100">
+                  <td
+                    className="px-4 py-2 border-b border-neutral-200 bg-blue-100 cursor-pointer hover:bg-blue-50"
+                    onClick={() => {
+                      setSelectedEmployeeData(employee);
+                      setIsBreakdownModalOpen(true);
+                    }}
+                  >
                     {employee.totalHours}
                   </td>
                 </tr>
@@ -241,6 +251,35 @@ const EmployeeSchedule: React.FC = () => {
           }}
         />
       )}
+
+      <WeeklyBreakdownModal
+        isOpen={isBreakdownModalOpen}
+        onClose={() => {
+          setIsBreakdownModalOpen(false);
+          setSelectedEmployeeData(null);
+        }}
+        dailyRecords={
+          selectedEmployeeData
+            ? selectedEmployeeData.dailyHours.map((day, index) => ({
+                date: format(weekDays[index], "MMM dd, yyyy"),
+                clockIn: "00:00", // These would need to come from your actual data
+                clockOut: "00:00",
+                lunchStart: "00:00",
+                lunchEnd: "00:00",
+                breaks: [],
+                totalHours:
+                  parseFloat(day.hours.split(":")[0]) +
+                  parseFloat(day.hours.split(":")[1]) / 60,
+              }))
+            : []
+        }
+        weeklyTotal={
+          selectedEmployeeData
+            ? parseFloat(selectedEmployeeData.totalHours.split(":")[0]) +
+              parseFloat(selectedEmployeeData.totalHours.split(":")[1]) / 60
+            : 0
+        }
+      />
     </>
   );
 };

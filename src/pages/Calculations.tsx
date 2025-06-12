@@ -8,14 +8,19 @@ import {
   FaClock,
   FaExclamationCircle,
   FaTimesCircle,
+  FaInfoCircle,
 } from "react-icons/fa";
 import Card from "../components/ui/Card";
 import useWorkTimeStore from "../store/workTimeStore";
 import TimePicker from "../components/ui/TimePicker";
 import TitleText from "../components/ui/header";
+import WeeklyBreakdownModal from "../components/ui/WeeklyBreakdownModal";
+import { EmployeeRecord, Break } from "../shared/types";
+import { ShiftTiming } from "../pages/Shifts/Shift.types";
+import { ShiftType } from "../components/ui/ShiftTypeSelector";
 
 // Types for simulation record and calculation result
-interface Break {
+interface SimulationBreak {
   start: string;
   end: string;
 }
@@ -25,7 +30,7 @@ interface SimulationRecord {
   clockOut: string;
   lunchStart: string;
   lunchEnd: string;
-  breaks: Break[];
+  breaks: SimulationBreak[];
 }
 
 interface CalculationResult {
@@ -54,6 +59,7 @@ interface CalculationResult {
 const Calculations: React.FC = () => {
   const location = useLocation();
   const { parameters, simulateCalculation } = useWorkTimeStore();
+  const [isBreakdownModalOpen, setIsBreakdownModalOpen] = useState(false);
 
   // Sample record for simulation
   const [simulationRecord, setSimulationRecord] = useState<SimulationRecord>({
@@ -68,19 +74,86 @@ const Calculations: React.FC = () => {
   const [calculationResult, setCalculationResult] =
     useState<CalculationResult | null>(null);
 
+  // Create a mock employee record for simulation
+  const mockEmployeeRecord = useMemo<EmployeeRecord>(
+    () => ({
+      id: "simulation",
+      name: "Simulation",
+      date: new Date().toISOString().split("T")[0],
+      company: "Default",
+      shift: {
+        name: "regular" as ShiftType,
+        start: parameters.workingHours.start,
+        end: parameters.workingHours.end,
+        lunchBreak: {
+          defaultStart: parameters.lunchBreak.defaultStart,
+          duration: parameters.lunchBreak.duration,
+          flexWindowStart: parameters.lunchBreak.flexWindowStart,
+          flexWindowEnd: parameters.lunchBreak.flexWindowEnd,
+        },
+        shiftBonus: {
+          isShiftBonus: false,
+          bonusAmount: 0,
+        },
+        earlyArrival: {
+          maxMinutes: parameters.earlyArrival.maxMinutes,
+          countTowardsTotal: parameters.earlyArrival.countTowardsTotal,
+        },
+        lateStay: {
+          maxMinutes: parameters.lateStay.maxMinutes,
+          countTowardsTotal: parameters.lateStay.countTowardsTotal,
+          overtimeMultiplier: parameters.lateStay.overtimeMultiplier,
+        },
+      },
+      clockIn: simulationRecord.clockIn,
+      clockOut: simulationRecord.clockOut,
+      lunchStart: simulationRecord.lunchStart,
+      lunchEnd: simulationRecord.lunchEnd,
+      breaks: simulationRecord.breaks.map((breakItem) => ({
+        start: breakItem.start,
+        end: breakItem.end,
+        defaultTime: breakItem.start,
+        duration: calculateDurationInMinutes(breakItem.start, breakItem.end),
+        enabled: true,
+      })),
+    }),
+    [parameters, simulationRecord]
+  );
+
+  // Helper function to calculate duration in minutes
+  const calculateDurationInMinutes = (start: string, end: string): number => {
+    const startDate = new Date(`2000-01-01T${start}`);
+    const endDate = new Date(`2000-01-01T${end}`);
+    return Math.round((endDate.getTime() - startDate.getTime()) / (1000 * 60));
+  };
+
   // Initialize with pre-filled data if available
   useEffect(() => {
     if (location.state?.record) {
       setSimulationRecord(location.state.record);
-      const result = simulateCalculation(location.state.record);
-      setCalculationResult(result);
+      const result = simulateCalculation(
+        mockEmployeeRecord,
+        mockEmployeeRecord.shift
+      );
+      setCalculationResult({
+        ...result,
+        regularHours: parseFloat(result.regularHours),
+        totalEffectiveHours: parseFloat(result.totalEffectiveHours),
+      });
     }
-  }, [location.state, parameters, simulateCalculation]);
+  }, [location.state, parameters, simulateCalculation, mockEmployeeRecord]);
 
   // Run calculation simulation
   const runCalculation = () => {
-    // const result = simulateCalculation(simulationRecord);
-    // setCalculationResult(result);
+    const result = simulateCalculation(
+      mockEmployeeRecord,
+      mockEmployeeRecord.shift
+    );
+    setCalculationResult({
+      ...result,
+      regularHours: parseFloat(result.regularHours),
+      totalEffectiveHours: parseFloat(result.totalEffectiveHours),
+    });
   };
 
   // Handle updating simulation record fields
@@ -143,6 +216,25 @@ const Calculations: React.FC = () => {
       <FaTimesCircle className="inline-block mr-1" />
     );
   };
+
+  // Calculate daily records for the breakdown
+  const dailyRecords = useMemo(() => {
+    if (!calculationResult) return [];
+
+    // For now, we'll just use the current simulation record
+    // In a real implementation, this would come from your data store
+    return [
+      {
+        date: new Date().toLocaleDateString(),
+        clockIn: simulationRecord.clockIn,
+        clockOut: simulationRecord.clockOut,
+        lunchStart: simulationRecord.lunchStart,
+        lunchEnd: simulationRecord.lunchEnd,
+        breaks: simulationRecord.breaks,
+        totalHours: calculationResult.totalWorkingMinutes / 60,
+      },
+    ];
+  }, [calculationResult, simulationRecord]);
 
   if (!parameters) {
     return (
@@ -406,7 +498,17 @@ const Calculations: React.FC = () => {
                     </div>
                     <div className="mt-2 pt-2 border-t border-primary-200 flex justify-between font-semibold">
                       <span>Total Effective:</span>
-                      <span>{calculationResult.totalEffectiveHours} hours</span>
+                      <div className="flex items-center">
+                        <span>
+                          {calculationResult.totalEffectiveHours} hours
+                        </span>
+                        <button
+                          onClick={() => setIsBreakdownModalOpen(true)}
+                          className="ml-2 text-primary-600 hover:text-primary-800"
+                        >
+                          <FaInfoCircle />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -583,6 +685,17 @@ const Calculations: React.FC = () => {
           </Card>
         </div>
       </div>
+
+      <WeeklyBreakdownModal
+        isOpen={isBreakdownModalOpen}
+        onClose={() => setIsBreakdownModalOpen(false)}
+        dailyRecords={dailyRecords}
+        weeklyTotal={
+          calculationResult?.totalWorkingMinutes
+            ? calculationResult.totalWorkingMinutes / 60
+            : 0
+        }
+      />
     </div>
   );
 };
