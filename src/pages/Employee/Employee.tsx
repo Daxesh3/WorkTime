@@ -66,6 +66,24 @@ const EmployeeSchedule: React.FC = () => {
   const weeklyData = useMemo(() => {
     const employeeMap = new Map<string, EmployeeWeeklyData>();
 
+    const calculateTimeDifference = (start: Date, end: Date): number => {
+      // If end time is earlier than start time, assume it's the next day
+      if (end < start) {
+        end.setDate(end.getDate() + 1);
+      }
+      return (end.getTime() - start.getTime()) / (1000 * 60); // Convert to minutes
+    };
+
+    const calculateBreakDuration = (
+      breaks: Array<{ start: string; end: string }>
+    ): number => {
+      return breaks.reduce((total, breakItem) => {
+        const breakStart = new Date(`2000-01-01T${breakItem.start}`);
+        const breakEnd = new Date(`2000-01-01T${breakItem.end}`);
+        return total + calculateTimeDifference(breakStart, breakEnd);
+      }, 0);
+    };
+
     filteredRecords.forEach((record) => {
       if (!employeeMap.has(record.id)) {
         employeeMap.set(record.id, {
@@ -80,24 +98,37 @@ const EmployeeSchedule: React.FC = () => {
       const employeeData = employeeMap.get(record.id)!;
       const dayIndex = new Date(record.date).getDay() - 1; // Convert to 0-6 (Monday-Sunday)
 
-      // Calculate hours worked
+      // Create date objects for all times
       const clockIn = new Date(`2000-01-01T${record.clockIn}`);
       const clockOut = new Date(`2000-01-01T${record.clockOut}`);
-      const hoursWorked =
-        (clockOut.getTime() - clockIn.getTime()) / (1000 * 60 * 60);
+      const lunchStart = new Date(`2000-01-01T${record.lunchStart}`);
+      const lunchEnd = new Date(`2000-01-01T${record.lunchEnd}`);
+
+      // Calculate total time (handling overnight shifts)
+      const totalMinutes = calculateTimeDifference(clockIn, clockOut);
+
+      // Calculate break times
+      const lunchBreakMinutes = calculateTimeDifference(lunchStart, lunchEnd);
+      const otherBreakMinutes = calculateBreakDuration(record.breaks);
+
+      // Calculate working minutes (excluding breaks)
+      const workingMinutes = Math.max(
+        0,
+        totalMinutes - lunchBreakMinutes - otherBreakMinutes
+      );
 
       // Format hours
-      const hours = Math.floor(hoursWorked);
-      const minutes = Math.round((hoursWorked - hours) * 60);
+      const hours = Math.floor(workingMinutes / 60);
+      const minutes = Math.round(workingMinutes % 60);
       const formattedHours = `${hours}:${minutes.toString().padStart(2, "0")}`;
 
       employeeData.dailyHours[dayIndex] = {
         hours: formattedHours,
-        hasAlert: hoursWorked < 8, // Alert if less than 8 hours
+        hasAlert: workingMinutes / 60 < 8, // Alert if less than 8 hours
       };
     });
 
-    // Calculate totals
+    // Calculate weekly totals
     employeeMap.forEach((data) => {
       const totalMinutes = data.dailyHours.reduce((acc, day) => {
         const [hours, minutes] = day.hours.split(":").map(Number);
@@ -379,11 +410,20 @@ const EmployeeSchedule: React.FC = () => {
                     },
                     0
                   );
-                  const totalMinutes =
+                  const tempWorkingHours =
                     (clockOut.getTime() - clockIn.getTime()) / (1000 * 60) -
-                    (lunchEnd.getTime() - lunchStart.getTime()) / (1000 * 60) -
-                    breakMinutes;
-                  return total + totalMinutes / 60;
+                    (lunchEnd.getTime() - lunchStart.getTime()) / (1000 * 60);
+                  if (tempWorkingHours < 0) {
+                    const totalMinutes = 1140 - tempWorkingHours - breakMinutes;
+                    return total + totalMinutes / 60;
+                  } else {
+                    const totalMinutes =
+                      (clockOut.getTime() - clockIn.getTime()) / (1000 * 60) -
+                      (lunchEnd.getTime() - lunchStart.getTime()) /
+                        (1000 * 60) -
+                      breakMinutes;
+                    return total + totalMinutes / 60;
+                  }
                 }, 0)
             : 0
         }
