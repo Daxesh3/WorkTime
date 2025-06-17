@@ -1,6 +1,6 @@
 import React, { FC, useState, useEffect } from "react";
 import { Outlet, NavLink, useLocation } from "react-router-dom";
-import { FiClock, FiCalendar, FiMenu, FiX } from "react-icons/fi";
+import { FiClock, FiCalendar, FiMenu, FiX, FiSettings } from "react-icons/fi";
 import { MdOutlineFactory } from "react-icons/md";
 
 interface Company {
@@ -26,6 +26,7 @@ const Layout: FC = () => {
   const navItems: NavItem[] = [
     { name: "Companies", path: "/companies", icon: <MdOutlineFactory /> },
     { name: "Employees", path: "/employee", icon: <FiCalendar /> },
+    { name: "Stamp Types", path: "/stamp-types", icon: <FiSettings /> },
   ];
 
   return (
