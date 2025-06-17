@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import { FaPlus } from "react-icons/fa";
-import { FiSettings } from "react-icons/fi";
-import { useParams, Link } from "react-router-dom";
 
 import { ShiftManagementProps, ShiftTiming } from "./Shift.types";
 import TableComponent from "../../components/table/table";
@@ -18,7 +16,6 @@ const ShiftManagement: React.FC<ShiftManagementProps> = ({
   onShiftDelete,
   onShiftUpdate,
 }) => {
-  const { companyId } = useParams<{ companyId: string }>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingShift, setEditingShift] = useState<ShiftTiming | null>(null);
   const [loading, setLoading] = useState(false);
@@ -76,22 +73,13 @@ const ShiftManagement: React.FC<ShiftManagementProps> = ({
             </h1>
             <p className="text-neutral-500 mt-1">{companyName}</p>
           </div>
-          <div className="flex items-center gap-4">
-            <Link
-              to={`/companies/${companyId}/stamp-types`}
-              className="btn btn-secondary"
-            >
-              <FiSettings className="mr-2" />
-              Configure Stamp Types
-            </Link>
-            <button
-              onClick={() => handleOpenModal()}
-              className="btn btn-primary"
-              disabled={loading}
-            >
-              <FaPlus /> Add New Shift
-            </button>
-          </div>
+          <button
+            onClick={() => handleOpenModal()}
+            className="btn btn-primary"
+            disabled={loading}
+          >
+            <FaPlus /> Add New Shift
+          </button>
         </div>
 
         <TableComponent className="mt-4">

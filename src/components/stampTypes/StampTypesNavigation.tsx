@@ -13,7 +13,7 @@ const StampTypesNavigation: React.FC<StampTypesNavigationProps> = ({
 
   const handleBack = () => {
     if (companyId) {
-      navigate(`/companies/${companyId}`);
+      navigate(`/companies`);
     } else {
       navigate("/");
     }
