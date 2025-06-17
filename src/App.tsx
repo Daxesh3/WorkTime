@@ -10,6 +10,7 @@ import ParameterSettings from "./pages/ParameterSettings";
 import CompanyDetails from "./pages/Company/CompanyDetails";
 import Calculations from "./pages/Calculations";
 import StampTypes from "./pages/StampTypes/StampTypes";
+import EmployeeRecordsPage from "./pages/Employee/EmployeeRecordsPage";
 
 const App: FC = () => {
   return (
@@ -26,6 +27,10 @@ const App: FC = () => {
         <Route
           path="/companies/:companyId/stamp-types"
           element={<StampTypes />}
+        />
+        <Route
+          path="/companies/:companyId/employee-records"
+          element={<EmployeeRecordsPage />}
         />
         <Route path="*" element={<NotFound />} />
       </Route>

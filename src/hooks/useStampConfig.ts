@@ -10,6 +10,14 @@ interface CompanyConfig {
   stamps?: Stamp[];
 }
 
+interface StampRecord {
+  id: string;
+  companyId: string;
+  employeeName: string;
+  stampType: string;
+  stampTime: string;
+}
+
 const DEFAULT_GLOBAL_STAMPS: Stamp[] = [
   { id: "stamp-1", name: "In" },
   { id: "stamp-2", name: "Out" },
@@ -25,11 +33,15 @@ const useStampConfig = () => {
   const [companyConfigs, setCompanyConfigs] = useState<
     Record<string, CompanyConfig>
   >({});
+  const [stampRecords, setStampRecords] = useState<
+    Record<string, StampRecord[]>
+  >({});
 
   // Initialize configurations from localStorage
   useEffect(() => {
     const storedGlobalConfig = localStorage.getItem("GlobalTimeConfig");
     const storedCompanyConfigs = localStorage.getItem("CompanyConfigs");
+    const storedStampRecords = localStorage.getItem("StampRecords");
 
     if (!storedGlobalConfig) {
       localStorage.setItem(
@@ -43,6 +55,10 @@ const useStampConfig = () => {
 
     if (storedCompanyConfigs) {
       setCompanyConfigs(JSON.parse(storedCompanyConfigs));
+    }
+
+    if (storedStampRecords) {
+      setStampRecords(JSON.parse(storedStampRecords));
     }
   }, []);
 
@@ -78,12 +94,40 @@ const useStampConfig = () => {
     return companyConfig.stamps || [];
   };
 
+  const addStampRecord = (
+    companyId: string,
+    recordData: { employeeName: string; stampType: string; stampTime?: string }
+  ) => {
+    const newRecord: StampRecord = {
+      id: `rec-${Date.now()}`,
+      companyId,
+      employeeName: recordData.employeeName,
+      stampType: recordData.stampType,
+      stampTime: recordData.stampTime || new Date().toISOString(),
+    };
+
+    const companyRecords = stampRecords[companyId] || [];
+    const newRecords = {
+      ...stampRecords,
+      [companyId]: [...companyRecords, newRecord],
+    };
+
+    localStorage.setItem("StampRecords", JSON.stringify(newRecords));
+    setStampRecords(newRecords);
+  };
+
+  const getStampsForCompany = (companyId: string): StampRecord[] => {
+    return stampRecords[companyId] || [];
+  };
+
   return {
     getGlobalConfig,
     updateGlobalConfig,
     getCompanyConfig,
     setCompanyConfig,
     getEffectiveStamps,
+    addStampRecord,
+    getStampsForCompany,
   };
 };
 

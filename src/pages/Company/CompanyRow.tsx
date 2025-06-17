@@ -3,7 +3,7 @@ import TableRow from "../../components/table/tableRow";
 import TableCell from "../../components/table/tableCell";
 import { useNavigate } from "react-router-dom";
 import { Company } from "../../shared/types";
-import { FiTrash2, FiSettings } from "react-icons/fi";
+import { FiTrash2, FiSettings, FiUsers } from "react-icons/fi";
 import { RiEdit2Line } from "react-icons/ri";
 
 interface Props {
@@ -48,6 +48,14 @@ const CompanyRow: React.FC<Props> = ({ company, onEdit, onDelete }) => {
             onClick={() => navigate(`/companies/${company.id}/stamp-types`)}
           >
             <FiSettings /> Stamp Types
+          </button>
+          <button
+            className={`btn btn-sm btn-secondary`}
+            onClick={() =>
+              navigate(`/companies/${company.id}/employee-records`)
+            }
+          >
+            <FiUsers /> Employee Records
           </button>
         </div>
       </TableCell>
