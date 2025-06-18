@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { FiClock } from 'react-icons/fi';
+import { FaClock } from 'react-icons/fa';
 import useStampConfig from '../../hooks/useStampConfig';
 import Modal from '../ui/Modal';
 import ShiftTypeSelector, { ShiftType } from '../ui/ShiftTypeSelector';
@@ -11,18 +11,27 @@ interface EmployeeStampCreatorProps {
     onClose: () => void;
 }
 
-const EmployeeStampCreator: React.FC<EmployeeStampCreatorProps> = ({ companyId, isOpen, onClose }) => {
+const EmployeeStampCreator: React.FC<EmployeeStampCreatorProps> = ({
+    companyId,
+    isOpen,
+    onClose,
+}) => {
     const { getEffectiveStamps, addStampRecord } = useStampConfig();
     const [employeeName, setEmployeeName] = useState('');
     const [selectedStampType, setSelectedStampType] = useState('');
     const [selectedShift, setSelectedShift] = useState<ShiftType>('morning');
 
-    const [stampTime, setStampTime] = useState(new Date().toISOString().slice(0, 16));
+    const [stampTime, setStampTime] = useState(
+        new Date().toISOString().slice(0, 16)
+    );
     const [showSuccess, setShowSuccess] = useState(false);
 
     const { companies } = useCompanyStore();
 
-    const companyDetails = useMemo(() => companies.find((company) => company.id === companyId), [companies, companyId]);
+    const companyDetails = useMemo(
+        () => companies.find((company) => company.id === companyId),
+        [companies, companyId]
+    );
 
     const availableStamps = getEffectiveStamps(companyId);
 
@@ -48,8 +57,12 @@ const EmployeeStampCreator: React.FC<EmployeeStampCreatorProps> = ({ companyId, 
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title='Create Time Stamp'>
-            <div className='space-y-6'>
+        <Modal
+            isOpen={isOpen}
+            onClose={onClose}
+            title='Create Time Stamp'
+        >
+            <div className='flex flex-col gap-3'>
                 <div>
                     <label className='input-label'>Employee Name</label>
                     <input
@@ -57,41 +70,70 @@ const EmployeeStampCreator: React.FC<EmployeeStampCreatorProps> = ({ companyId, 
                         value={employeeName}
                         onChange={(e) => setEmployeeName(e.target.value)}
                         placeholder='Enter employee name'
-                        className='input w-full'
+                        className='time-input w-full'
                         required
                     />
                 </div>
 
                 <div>
                     <label className='input-label'>Stamp Type</label>
-                    <select value={selectedStampType} onChange={(e) => setSelectedStampType(e.target.value)} className='input w-full' required>
+                    <select
+                        value={selectedStampType}
+                        onChange={(e) => setSelectedStampType(e.target.value)}
+                        className='time-input bg-white w-full'
+                        required
+                    >
                         <option value=''>Select a stamp type</option>
                         {availableStamps.map((stamp) => (
-                            <option key={stamp.id} value={stamp.name}>
+                            <option
+                                key={stamp.id}
+                                value={stamp.name}
+                            >
                                 {stamp.name}
                             </option>
                         ))}
                     </select>
                 </div>
 
-                <ShiftTypeSelector company={companyDetails?.name} value={selectedShift} onChange={(value) => setSelectedShift(value)} />
+                <ShiftTypeSelector
+                    company={companyDetails?.name}
+                    value={selectedShift}
+                    onChange={(value) => setSelectedShift(value)}
+                />
 
                 <div>
                     <label className='input-label'>Stamp Time</label>
-                    <input type='datetime-local' value={stampTime} onChange={(e) => setStampTime(e.target.value)} className='input w-full' required />
+                    <input
+                        type='datetime-local'
+                        value={stampTime}
+                        onChange={(e) => setStampTime(e.target.value)}
+                        className='time-input w-full'
+                        required
+                    />
                 </div>
 
-                <div className='flex justify-end space-x-3'>
-                    <button onClick={onClose} className='btn btn-secondary'>
+                <div className='flex justify-end space-x-2'>
+                    <button
+                        onClick={onClose}
+                        className='btn btn-secondary'
+                    >
                         Cancel
                     </button>
-                    <button onClick={handleStamp} className='btn btn-primary' disabled={!selectedStampType || !employeeName.trim()}>
-                        <FiClock className='mr-2' />
+                    <button
+                        onClick={handleStamp}
+                        className='btn btn-primary'
+                        disabled={!selectedStampType || !employeeName.trim()}
+                    >
+                        <FaClock />
                         Create Stamp
                     </button>
                 </div>
 
-                {showSuccess && <div className='text-success-600 text-center animate-fade-in'>Stamped successfully!</div>}
+                {showSuccess && (
+                    <div className='text-success-600 text-center animate-fade-in'>
+                        Stamped successfully!
+                    </div>
+                )}
             </div>
         </Modal>
     );
