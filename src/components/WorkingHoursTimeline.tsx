@@ -66,11 +66,11 @@ const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
         ))}
         {/* IN Marker */}
         <div
-          className="absolute -top-2 group"
+          className="absolute -top-2 "
           style={{ left: `${timeToPercentage(inTime)}%` }}
         >
-          <div className="w-4 h-4 bg-emerald-500 rounded-full border-2 border-white shadow-lg"></div>
-          <div className="absolute top-6 -translate-x-1/2 whitespace-nowrap hidden group-hover:block z-[1]">
+          <div className="absolute top-6 -translate-x-1/2 whitespace-nowrap  group-hover:block z-[1]">
+            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rotate-45 w-1 h-1 bg-emerald-50 border-l border-t border-emerald-200"></div>
             <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-1 shadow-sm">
               <div className="text-sm font-semibold text-emerald-700">IN</div>
               <div className="text-xs text-emerald-600">{inTime}</div>
@@ -79,11 +79,11 @@ const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
         </div>
         {/* OUT Marker */}
         <div
-          className="absolute -top-2 group"
+          className="absolute -top-2 "
           style={{ left: `${timeToPercentage(outTime)}%` }}
         >
-          <div className="w-4 h-4 bg-emerald-500 rounded-full border-2 border-white shadow-lg"></div>
-          <div className="absolute top-6 -translate-x-1/2 whitespace-nowrap hidden group-hover:block z-[1]">
+          <div className="absolute top-6 -translate-x-1/2 whitespace-nowrap  group-hover:block z-[1]">
+            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rotate-45 w-1 h-1 bg-emerald-50 border-l border-t border-emerald-200"></div>
             <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-1 shadow-sm">
               <div className="text-sm font-semibold text-emerald-700">OUT</div>
               <div className="text-xs text-emerald-600">{outTime}</div>
