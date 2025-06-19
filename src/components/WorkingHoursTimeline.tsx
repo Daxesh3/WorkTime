@@ -147,7 +147,21 @@ const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
           Daily Summary
         </h4>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+          <div
+            className="bg-slate-50 rounded-lg p-4 border border-slate-200"
+            style={{
+              backgroundColor:
+                parseFloat(calculation.actualWorking) <
+                parseFloat(calculation.required)
+                  ? "rgb(255 241 226)"
+                  : undefined,
+              borderColor:
+                parseFloat(calculation.actualWorking) <
+                parseFloat(calculation.required)
+                  ? "rgb(219 181 136)"
+                  : undefined,
+            }}
+          >
             <div className="text-sm text-slate-600 mb-1">Actual Working</div>
             <div className="text-lg font-semibold text-slate-800">
               {calculation.actualWorking}
@@ -166,7 +180,7 @@ const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
             </div>
           </div>
           <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-            <div className="text-sm text-slate-600 mb-1">Flex Time</div>
+            <div className="text-sm text-slate-600 mb-1">Flex Bank</div>
             <div className="text-lg font-semibold text-slate-800">
               {calculation.flex}
             </div>
