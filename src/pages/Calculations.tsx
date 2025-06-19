@@ -237,6 +237,13 @@ const Calculations: React.FC = () => {
     ];
   }, [calculationResult, simulationRecord]);
 
+  // Helper to format minutes as HH:mm
+  const formatHHmm = (minutes: number) => {
+    const h = Math.floor(minutes / 60);
+    const m = Math.round(minutes % 60);
+    return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
+  };
+
   if (!parameters) {
     return (
       <div className="space-y-6 py-4">
@@ -467,12 +474,12 @@ const Calculations: React.FC = () => {
                   end: simulationRecord.lunchEnd,
                 }}
                 calculation={{
-                  actualWorking: `${(
-                    calculationResult.totalWorkingMinutes / 60
-                  ).toFixed(2)} hours`,
+                  actualWorking: formatHHmm(
+                    calculationResult.totalWorkingMinutes
+                  ),
                   required: `${calculationResult.regularHours} hours`,
                   lunch: `${calculationResult.lunchDuration} min`,
-                  flex: `${calculationResult.overtimeHours.toFixed(2)} hours`,
+                  flex: formatHHmm(calculationResult.overtimeHours * 60),
                 }}
               />
             </Card>

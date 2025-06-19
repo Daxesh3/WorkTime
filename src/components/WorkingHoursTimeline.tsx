@@ -37,7 +37,7 @@ const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-8">
+    <div className="bg-white    border-slate-200 ">
       {/* Header */}
       <div className="mb-8">
         <h3 className="text-xl font-semibold text-slate-800 mb-2">
