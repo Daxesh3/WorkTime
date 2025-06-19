@@ -52,7 +52,6 @@ const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
       <div className="relative">
         {/* Timeline Base Line */}
         <div className="absolute top-0 left-0 w-full h-0.5 bg-slate-300 rounded-full"></div>
-
         {/* Hour Markers */}
         {Array.from({ length: 25 }).map((_, index) => (
           <div
@@ -60,45 +59,42 @@ const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
             className="absolute top-0 w-px h-3 bg-slate-400"
             style={{ left: `${(index / 24) * 100}%` }}
           >
-            <div className="absolute -left-4 top-4 text-xs font-medium text-slate-500">
+            <div className="absolute left-[-7px] top-4 text-xs font-medium text-slate-500">
               {String(index).padStart(2, "0")}
             </div>
           </div>
         ))}
-
         {/* IN Marker */}
         <div
-          className="absolute -top-2"
+          className="absolute -top-2 group"
           style={{ left: `${timeToPercentage(inTime)}%` }}
         >
           <div className="w-4 h-4 bg-emerald-500 rounded-full border-2 border-white shadow-lg"></div>
-          <div className="absolute top-6 -translate-x-1/2 whitespace-nowrap">
+          <div className="absolute top-6 -translate-x-1/2 whitespace-nowrap hidden group-hover:block z-[1]">
             <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-1 shadow-sm">
               <div className="text-sm font-semibold text-emerald-700">IN</div>
               <div className="text-xs text-emerald-600">{inTime}</div>
             </div>
           </div>
         </div>
-
         {/* OUT Marker */}
         <div
-          className="absolute -top-2"
+          className="absolute -top-2 group"
           style={{ left: `${timeToPercentage(outTime)}%` }}
         >
           <div className="w-4 h-4 bg-emerald-500 rounded-full border-2 border-white shadow-lg"></div>
-          <div className="absolute top-6 -translate-x-1/2 whitespace-nowrap">
+          <div className="absolute top-6 -translate-x-1/2 whitespace-nowrap hidden group-hover:block z-[1]">
             <div className="bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-1 shadow-sm">
               <div className="text-sm font-semibold text-emerald-700">OUT</div>
               <div className="text-xs text-emerald-600">{outTime}</div>
             </div>
           </div>
         </div>
-
         {/* Working Periods */}
         {workingPeriods.map((period, index) => (
           <div
             key={index}
-            className="absolute top-0 h-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full shadow-md"
+            className="absolute top-0 h-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full shadow-md group"
             style={{
               left: `${timeToPercentage(period.start)}%`,
               width: `${
@@ -107,7 +103,7 @@ const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
             }}
           >
             {/* Working Period Label */}
-            <div className="absolute top-8 left-1/2 -translate-x-1/2">
+            <div className="hidden group-hover:block absolute top-8 left-1/2 -translate-x-1/2 w-max z-[1]">
               <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 shadow-lg min-w-[200px]">
                 <div className="text-sm font-semibold text-blue-800 mb-1">
                   Working time: {calculateDuration(period.start, period.end)}{" "}
@@ -120,10 +116,9 @@ const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
             </div>
           </div>
         ))}
-
         {/* Lunch Period */}
         <div
-          className="absolute top-0 h-2 bg-gradient-to-r from-rose-400 to-rose-500 rounded-full shadow-md"
+          className="absolute top-0 h-2 bg-gradient-to-r from-rose-400 to-rose-500 rounded-full shadow-md group"
           style={{
             left: `${timeToPercentage(lunchPeriod.start)}%`,
             width: `${
@@ -133,7 +128,7 @@ const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
           }}
         >
           {/* Lunch Label */}
-          <div className="absolute top-8 left-1/2 -translate-x-1/2">
+          <div className="hidden group-hover:block absolute top-8 left-1/2 -translate-x-1/2 w-max z-[1]">
             <div className="bg-rose-50 border border-rose-200 rounded-xl p-3 shadow-lg">
               <div className="text-sm font-semibold text-rose-700">
                 Lunch time
@@ -144,19 +139,6 @@ const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
             </div>
           </div>
         </div>
-
-        {/* Vertical Separators for Key Times */}
-        {[inTime, lunchPeriod.start, lunchPeriod.end, outTime].map(
-          (time, index) => (
-            <div
-              key={`separator-${index}`}
-              className="absolute top-0 w-px h-8 bg-slate-400 border-dashed"
-              style={{ left: `${timeToPercentage(time)}%` }}
-            >
-              <div className="absolute top-8 -translate-x-1/2 w-2 h-2 bg-slate-400 rounded-full"></div>
-            </div>
-          )
-        )}
       </div>
 
       {/* Calculation Summary */}
