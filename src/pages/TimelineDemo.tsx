@@ -1,5 +1,5 @@
 import React from "react";
-import WorkingHoursTimeline from "../components/ui/WorkingHoursTimeline";
+import WorkingHoursTimeline from "../components/WorkingHoursTimeline";
 
 const TimelineDemo: React.FC = () => {
   return (
@@ -15,17 +15,22 @@ const TimelineDemo: React.FC = () => {
         </div>
 
         <WorkingHoursTimeline
-          clockIn="07:49"
-          clockOut="16:11"
-          lunchStart="11:00"
-          lunchEnd="11:30"
-          workingTime1Start="08:00"
-          workingTime1End="11:00"
-          workingTime2Start="11:30"
-          workingTime2End="16:00"
-          totalWorkingHours={8}
-          lunchDuration={30}
-          dailyRestFulfilled={true}
+          inTime="07:49"
+          outTime="16:11"
+          workingPeriods={[
+            { start: "08:00", end: "11:00" },
+            { start: "11:30", end: "16:00" },
+          ]}
+          lunchPeriod={{
+            start: "11:00",
+            end: "11:30",
+          }}
+          calculation={{
+            actualWorking: "8.0 hours",
+            required: "8 hours",
+            lunch: "30 min",
+            flex: "0.0 hours",
+          }}
         />
 
         <div className="mt-8 bg-white rounded-lg shadow-lg p-6">
@@ -40,9 +45,9 @@ const TimelineDemo: React.FC = () => {
               <ul className="text-sm text-gray-600 space-y-1">
                 <li>• 24-hour timeline with hourly markers</li>
                 <li>• Green circles for clock in/out stamps</li>
-                <li>• Green bars for working time periods</li>
-                <li>• Red dashed line for lunch break</li>
-                <li>• Connecting dashed lines show time flow</li>
+                <li>• Blue bars for working time periods</li>
+                <li>• Rose bars for lunch breaks</li>
+                <li>• Clear visual separation of time periods</li>
               </ul>
             </div>
             <div>

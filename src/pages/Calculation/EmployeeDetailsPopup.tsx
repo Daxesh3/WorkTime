@@ -13,7 +13,7 @@ import TimePicker from "../../components/ui/TimePicker";
 import useCompanyStore from "../../store/companyStore";
 import { GiMoneyStack } from "react-icons/gi";
 import Modal from "../../components/ui/Modal";
-import WorkingHoursTimeline from "../../components/ui/WorkingHoursTimeline";
+import WorkingHoursTimeline from "../../components/WorkingHoursTimeline";
 import { EmployeeRecord } from "../../shared/types";
 
 interface IProps {
@@ -137,17 +137,30 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
         {calculationResult && (
           <Card title="Timeline Visualization" icon={<FaClock size={20} />}>
             <WorkingHoursTimeline
-              clockIn={simulationRecord.clockIn}
-              clockOut={simulationRecord.clockOut}
-              lunchStart={simulationRecord.lunchStart}
-              lunchEnd={simulationRecord.lunchEnd}
-              workingTime1Start={calculationResult.effectiveStart}
-              workingTime1End={simulationRecord.lunchStart}
-              workingTime2Start={simulationRecord.lunchEnd}
-              workingTime2End={calculationResult.effectiveEnd}
-              totalWorkingHours={calculationResult.totalWorkingMinutes / 60}
-              lunchDuration={calculationResult.lunchDuration}
-              dailyRestFulfilled={true}
+              inTime={simulationRecord.clockIn}
+              outTime={simulationRecord.clockOut}
+              workingPeriods={[
+                {
+                  start: simulationRecord.clockIn,
+                  end: simulationRecord.lunchStart,
+                },
+                {
+                  start: simulationRecord.lunchEnd,
+                  end: simulationRecord.clockOut,
+                },
+              ]}
+              lunchPeriod={{
+                start: simulationRecord.lunchStart,
+                end: simulationRecord.lunchEnd,
+              }}
+              calculation={{
+                actualWorking: `${(
+                  calculationResult.totalWorkingMinutes / 60
+                ).toFixed(2)} hours`,
+                required: `${calculationResult.regularHours} hours`,
+                lunch: `${calculationResult.lunchDuration} min`,
+                flex: `${calculationResult.overtimeHours.toFixed(2)} hours`,
+              }}
             />
           </Card>
         )}

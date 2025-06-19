@@ -15,6 +15,7 @@ import useWorkTimeStore from "../store/workTimeStore";
 import TimePicker from "../components/ui/TimePicker";
 import TitleText from "../components/ui/header";
 import WeeklyBreakdownModal from "../components/ui/WeeklyBreakdownModal";
+import WorkingHoursTimeline from "../components/WorkingHoursTimeline";
 import { EmployeeRecord, Break } from "../shared/types";
 import { ShiftTiming } from "../pages/Shifts/Shift.types";
 import { ShiftType } from "../components/ui/ShiftTypeSelector";
@@ -443,6 +444,40 @@ const Calculations: React.FC = () => {
             </div>
           </Card>
         </div>
+
+        {/* Timeline Visualization */}
+        {calculationResult && (
+          <div className="lg:col-span-3">
+            <Card title="Timeline Visualization" icon={<FaClock size={20} />}>
+              <WorkingHoursTimeline
+                inTime={simulationRecord.clockIn}
+                outTime={simulationRecord.clockOut}
+                workingPeriods={[
+                  {
+                    start: simulationRecord.clockIn,
+                    end: simulationRecord.lunchStart,
+                  },
+                  {
+                    start: simulationRecord.lunchEnd,
+                    end: simulationRecord.clockOut,
+                  },
+                ]}
+                lunchPeriod={{
+                  start: simulationRecord.lunchStart,
+                  end: simulationRecord.lunchEnd,
+                }}
+                calculation={{
+                  actualWorking: `${(
+                    calculationResult.totalWorkingMinutes / 60
+                  ).toFixed(2)} hours`,
+                  required: `${calculationResult.regularHours} hours`,
+                  lunch: `${calculationResult.lunchDuration} min`,
+                  flex: `${calculationResult.overtimeHours.toFixed(2)} hours`,
+                }}
+              />
+            </Card>
+          </div>
+        )}
 
         <div>
           <Card
