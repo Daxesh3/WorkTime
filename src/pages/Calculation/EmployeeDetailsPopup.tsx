@@ -15,6 +15,7 @@ import { GiMoneyStack } from "react-icons/gi";
 import Modal from "../../components/ui/Modal";
 import WorkingHoursTimeline from "../../components/WorkingHoursTimeline";
 import { EmployeeRecord } from "../../shared/types";
+import { calculateFlexBank } from "../../utils/flexBank";
 
 interface IProps {
   isOpen: boolean;
@@ -41,10 +42,14 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
   isOpen,
   userCalculation: user,
 }) => {
-  const { simulateCalculation } = useWorkTimeStore();
+  const {
+    simulateCalculation,
+    employeeRecords,
+    parameters: globalParameters,
+  } = useWorkTimeStore();
   const { getCurrentParameters } = useCompanyStore();
 
-  const parameters = getCurrentParameters(
+  const shiftParameters = getCurrentParameters(
     user?.company || "",
     user?.shift?.id || ""
   );
@@ -64,13 +69,13 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
 
   // Initialize with pre-filled data if available
   useEffect(() => {
-    if (user && parameters) {
+    if (user && shiftParameters) {
       setSimulationRecord(user);
-      const result = simulateCalculation(user, parameters);
+      const result = simulateCalculation(user, shiftParameters);
       console.log(" result:", result);
       setCalculationResult(result);
     }
-  }, [user, parameters, simulateCalculation]);
+  }, [user, shiftParameters, simulateCalculation]);
 
   // Handle updating simulation record fields
   const handleFieldChange = (
@@ -119,7 +124,55 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
     return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
   };
 
-  if (!parameters) {
+  // Calculate week range for the selected record
+  const weekStart = useMemo(() => {
+    if (!user) return null;
+    const date = new Date(user.date);
+    const day = date.getDay() || 7;
+    date.setHours(0, 0, 0, 0);
+    date.setDate(date.getDate() - (day - 1));
+    return date;
+  }, [user]);
+  const weekEnd = useMemo(() => {
+    if (!weekStart) return null;
+    const end = new Date(weekStart);
+    end.setDate(end.getDate() + 6);
+    return end;
+  }, [weekStart]);
+
+  // Get all records for this employee for the week, sorted by date
+  const employeeRecordsThisWeek = useMemo(() => {
+    if (!user || !weekStart || !weekEnd) return [];
+    return employeeRecords
+      .filter(
+        (r: EmployeeRecord) =>
+          r.id === user.id &&
+          new Date(r.date) >= weekStart &&
+          new Date(r.date) <= weekEnd
+      )
+      .sort(
+        (a: EmployeeRecord, b: EmployeeRecord) =>
+          new Date(a.date).getTime() - new Date(b.date).getTime()
+      );
+  }, [user, weekStart, weekEnd, employeeRecords]);
+
+  // Calculate flex bank for each day using the utility
+  const employeeRecordsWithFlex = useMemo(() => {
+    if (!employeeRecordsThisWeek.length || !globalParameters) return [];
+    return calculateFlexBank(
+      employeeRecordsThisWeek,
+      globalParameters.workingHours.totalRequired
+    );
+  }, [employeeRecordsThisWeek, globalParameters]);
+
+  // Get flex bank for the selected day
+  const flexBankForThisDay = useMemo(() => {
+    if (!user) return 0;
+    const rec = employeeRecordsWithFlex.find((r) => r.date === user.date);
+    return rec?.flexBank || 0;
+  }, [employeeRecordsWithFlex, user]);
+
+  if (!shiftParameters) {
     return (
       <div className="space-y-6 py-4">
         <div className="animate-fade-in-down animate-duration-300">
@@ -166,7 +219,7 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
                 ),
                 required: calculationResult.regularHours,
                 lunch: `${calculationResult.lunchDuration} min`,
-                flex: formatHHmm(calculationResult.overtimeHours * 60),
+                flex: formatHHmm(flexBankForThisDay),
               }}
             />
           </Card>
@@ -281,16 +334,16 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
                       <span className="text-neutral-600">Shift:</span>
                       <div className="flex items-center">
                         <span className="font-medium first-letter:capitalize">
-                          {parameters.name}{" "}
+                          {shiftParameters.name}{" "}
                         </span>
-                        {parameters.shiftBonus?.isShiftBonus && (
+                        {shiftParameters.shiftBonus?.isShiftBonus && (
                           <div className="flex items-center font-medium ml-1">
                             (
                             <GiMoneyStack
                               className="text-green-600 mr-1"
                               size={20}
                             />{" "}
-                            {parameters.shiftBonus?.bonusAmount || 0})
+                            {shiftParameters.shiftBonus?.bonusAmount || 0})
                           </div>
                         )}
                       </div>
@@ -298,7 +351,7 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
                     <div className="flex justify-between">
                       <span className="text-neutral-600">Work Hours:</span>
                       <span className="font-medium">
-                        {parameters.start} - {parameters.end}
+                        {shiftParameters.start} - {shiftParameters.end}
                       </span>
                     </div>
 
@@ -312,23 +365,23 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
                     <div className="flex justify-between">
                       <span className="text-neutral-600">Lunch Break:</span>
                       <span className="font-medium">
-                        {parameters.lunchBreak.duration} min
+                        {shiftParameters.lunchBreak.duration} min
                       </span>
                     </div>
 
                     <div className="flex justify-between">
                       <span className="text-neutral-600">Lunch Window:</span>
                       <span className="font-medium">
-                        {parameters.lunchBreak.flexWindowStart} -{" "}
-                        {parameters.lunchBreak.flexWindowEnd}
+                        {shiftParameters.lunchBreak.flexWindowStart} -{" "}
+                        {shiftParameters.lunchBreak.flexWindowEnd}
                       </span>
                     </div>
 
                     <div className="flex justify-between">
                       <span className="text-neutral-600">Early Arrival:</span>
                       <span className="font-medium">
-                        Max {parameters.earlyArrival.maxMinutes} min
-                        {parameters.earlyArrival.countTowardsTotal
+                        Max {shiftParameters.earlyArrival.maxMinutes} min
+                        {shiftParameters.earlyArrival.countTowardsTotal
                           ? " (counted)"
                           : " (not counted)"}
                       </span>
@@ -337,8 +390,8 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
                     <div className="flex justify-between">
                       <span className="text-neutral-600">Late Stay:</span>
                       <span className="font-medium">
-                        Max {parameters.lateStay.maxMinutes} min
-                        {parameters.lateStay.countTowardsTotal
+                        Max {shiftParameters.lateStay.maxMinutes} min
+                        {shiftParameters.lateStay.countTowardsTotal
                           ? " (counted)"
                           : " (not counted)"}
                       </span>
@@ -347,7 +400,7 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
                     <div className="flex justify-between">
                       <span className="text-neutral-600">Overtime Rate:</span>
                       <span className="font-medium">
-                        {parameters.lateStay.overtimeMultiplier}×
+                        {shiftParameters.lateStay.overtimeMultiplier}×
                       </span>
                     </div>
                   </div>
@@ -442,7 +495,7 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
                           {calculationResult.totalEffectiveHours} hours
                         </span>
                       </div>
-                      {parameters.shiftBonus?.isShiftBonus && (
+                      {shiftParameters.shiftBonus?.isShiftBonus && (
                         <div className="flex justify-between font-semibold">
                           <span className="text-neutral-600">Shift Bonus:</span>
                           <span className="flex gap-1 items-center">
@@ -450,7 +503,7 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
                               className="text-green-600"
                               size={20}
                             />{" "}
-                            {parameters.shiftBonus?.bonusAmount || 0}
+                            {shiftParameters.shiftBonus?.bonusAmount || 0}
                           </span>
                         </div>
                       )}
@@ -517,7 +570,7 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
                         <div className="text-primary-600">
                           <FaExclamationCircle className="inline-block mr-1" />
                           Early by {calculationResult.earlyArrivalMinutes} min
-                          {parameters.earlyArrival.countTowardsTotal
+                          {shiftParameters.earlyArrival.countTowardsTotal
                             ? " (counted)"
                             : " (not counted)"}
                         </div>
@@ -545,7 +598,7 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
                           {calculationResult.lateDepartureMinutes} min
                           {calculationResult.overtimeHours > 0
                             ? " (includes overtime)"
-                            : parameters.lateStay.countTowardsTotal
+                            : shiftParameters.lateStay.countTowardsTotal
                             ? " (counted)"
                             : " (not counted)"}
                         </div>

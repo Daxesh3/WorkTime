@@ -107,6 +107,7 @@ export interface EmployeeRecord {
   shift: ShiftTiming;
   breaks: Break[]; // List of additional breaks
   dateId?: string | null;
+  flexBank?: number; // Flex bank in minutes
 }
 
 export interface Break {
