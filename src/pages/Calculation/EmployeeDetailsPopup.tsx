@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { format, eachDayOfInterval } from "date-fns";
 
 import {
   FaChartPie,
@@ -16,6 +17,8 @@ import Modal from "../../components/ui/Modal";
 import WorkingHoursTimeline from "../../components/WorkingHoursTimeline";
 import { EmployeeRecord } from "../../shared/types";
 import { calculateFlexBank } from "../../utils/flexBank";
+import { calculateDailyData, minutesToHHMM } from "../../utils/weeklySummary";
+import { DailyRecord } from "../../components/ui/WeeklyBreakdownModal";
 
 interface IProps {
   isOpen: boolean;
@@ -77,53 +80,6 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
     }
   }, [user, shiftParameters, simulateCalculation]);
 
-  // Handle updating simulation record fields
-  const handleFieldChange = (
-    field: keyof SimulationRecord,
-    value: string
-  ) => {};
-
-  // Handle updating break times
-  const handleBreakChange = (
-    index: number,
-    field: keyof Break,
-    value: string
-  ) => {};
-
-  // Handle removing a break
-  const handleRemoveBreak = (index: number) => {};
-
-  // Format break time as string
-  const formatBreakTime = (minutes: number) => {
-    if (minutes < 60) {
-      return `${minutes} min`;
-    }
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return `${hours}h ${mins}m`;
-  };
-
-  // Get status color
-  const getStatusColor = (status: boolean) => {
-    return status ? "text-success-600" : "text-error-600";
-  };
-
-  // Get status icon
-  const getStatusIcon = (status: boolean) => {
-    return status ? (
-      <FaCheckCircle className="inline-block mr-1" />
-    ) : (
-      <FaTimesCircle className="inline-block mr-1" />
-    );
-  };
-
-  // Helper to format minutes as HH:mm
-  const formatHHmm = (minutes: number) => {
-    const h = Math.floor(minutes / 60);
-    const m = Math.round(minutes % 60);
-    return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
-  };
-
   // Calculate week range for the selected record
   const weekStart = useMemo(() => {
     if (!user) return null;
@@ -172,6 +128,91 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
     return rec?.flexBank || 0;
   }, [employeeRecordsWithFlex, user]);
 
+  // Calculate daily summary data for the selected record
+  const dailySummary = useMemo(() => {
+    if (!user || !shiftParameters) return null;
+    const data = calculateDailyData(user, shiftParameters);
+    // Format flex hours with a plus sign if positive
+    const flexHoursFormatted = `${
+      data.dailyFlexTimeChangeMinutes >= 0 &&
+      data.dailyFlexTimeChangeMinutes !== 0
+        ? "+"
+        : ""
+    }${minutesToHHMM(data.dailyFlexTimeChangeMinutes)} H`;
+
+    const flexBankFormatted = `${minutesToHHMM(flexBankForThisDay)} ${
+      data.dailyFlexTimeChangeMinutes >= 0 ? "+" : "-"
+    } ${minutesToHHMM(Math.abs(data.dailyFlexTimeChangeMinutes))}`;
+
+    // Construct DailyRecord like object for display consistency
+    return {
+      date: format(new Date(user.date), "MMM dd, yyyy"),
+      inTime: data.clockIn,
+      outTime: data.clockOut,
+      lunchPeriod: `${data.lunchStart} - ${data.lunchEnd}`,
+      totalTime: minutesToHHMM(data.totalTimeFromInOutMinutes),
+      minBreak: minutesToHHMM(data.minBreakMinutes),
+      takenBreaks: minutesToHHMM(
+        data.lunchBreakMinutes + data.otherBreakMinutes
+      ),
+      totalWorkingHours: `${minutesToHHMM(
+        data.totalWorkingMinutesExcludingBreaks
+      )} h`,
+      requiredHours: `${minutesToHHMM(data.requiredDailyWorkingHours)} h`,
+      flexHours: flexHoursFormatted,
+      flexBank: flexBankFormatted,
+      dailyFlexTimeChangeDirection:
+        data.dailyFlexTimeChangeMinutes >= 0 ? "added" : "removed",
+    } as DailyRecord;
+  }, [user, shiftParameters, flexBankForThisDay]);
+
+  // Handle updating simulation record fields
+  const handleFieldChange = (
+    field: keyof SimulationRecord,
+    value: string
+  ) => {};
+
+  // Handle updating break times
+  const handleBreakChange = (
+    index: number,
+    field: keyof Break,
+    value: string
+  ) => {};
+
+  // Handle removing a break
+  const handleRemoveBreak = (index: number) => {};
+
+  // Format break time as string
+  const formatBreakTime = (minutes: number) => {
+    if (minutes < 60) {
+      return `${minutes} min`;
+    }
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return `${hours}h ${mins}m`;
+  };
+
+  // Get status color
+  const getStatusColor = (status: boolean) => {
+    return status ? "text-success-600" : "text-error-600";
+  };
+
+  // Get status icon
+  const getStatusIcon = (status: boolean) => {
+    return status ? (
+      <FaCheckCircle className="inline-block mr-1" />
+    ) : (
+      <FaTimesCircle className="inline-block mr-1" />
+    );
+  };
+
+  // Helper to format minutes as HH:mm
+  const formatHHmm = (minutes: number) => {
+    const h = Math.floor(minutes / 60);
+    const m = Math.round(minutes % 60);
+    return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
+  };
+
   if (!shiftParameters) {
     return (
       <div className="space-y-6 py-4">
@@ -193,6 +234,101 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
       title={"Record Details"}
     >
       <div className="space-y-6">
+        {/* Daily Summary Card */}
+        {dailySummary && (
+          <Card title="Daily Summary" icon={<FaChartPie size={20} />}>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+              <div className="flex flex-col">
+                <span className="font-medium text-neutral-700">Day:</span>
+                <span className="text-neutral-900">{dailySummary.date}</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="font-medium text-neutral-700">In:</span>
+                <span className="text-neutral-900">{dailySummary.inTime}</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="font-medium text-neutral-700">Out:</span>
+                <span className="text-neutral-900">{dailySummary.outTime}</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="font-medium text-neutral-700">Lunch:</span>
+                <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                  {dailySummary.lunchPeriod}
+                </span>
+              </div>
+              <div className="flex flex-col">
+                <span className="font-medium text-neutral-700">
+                  Total time:
+                </span>
+                <span className="text-neutral-900">
+                  {dailySummary.totalTime}
+                </span>
+              </div>
+              <div className="flex flex-col">
+                <span className="font-medium text-neutral-700">Min break:</span>
+                <span className="text-neutral-900">
+                  {dailySummary.minBreak}
+                </span>
+              </div>
+              <div className="flex flex-col">
+                <span className="font-medium text-neutral-700">
+                  Taken Breaks:
+                </span>
+                <span
+                  className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${
+                    dailySummary.dailyFlexTimeChangeDirection === "added"
+                      ? "bg-green-50 text-green-700 ring-green-600/20"
+                      : "bg-red-50 text-red-700 ring-red-600/20"
+                  } ring-1 ring-inset`}
+                >
+                  {dailySummary.takenBreaks}
+                </span>
+              </div>
+              <div className="flex flex-col">
+                <span className="font-medium text-neutral-700">
+                  Total working hour:
+                </span>
+                <span className="text-neutral-900">
+                  {dailySummary.totalWorkingHours}
+                </span>
+              </div>
+              <div className="flex flex-col">
+                <span className="font-medium text-neutral-700">
+                  Required hours:
+                </span>
+                <span className="text-neutral-900">
+                  {dailySummary.requiredHours}
+                </span>
+              </div>
+              <div className="flex flex-col">
+                <span className="font-medium text-neutral-700">
+                  Flex hours:
+                </span>
+                <span
+                  className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${
+                    dailySummary.dailyFlexTimeChangeDirection === "added"
+                      ? "bg-green-50 text-green-700 ring-green-600/20"
+                      : "bg-red-50 text-red-700 ring-red-600/20"
+                  } ring-1 ring-inset`}
+                >
+                  {dailySummary.flexHours}
+                </span>
+              </div>
+              <div className="flex flex-col">
+                <span className="font-medium text-neutral-700">Flex bank:</span>
+                <span
+                  className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${
+                    dailySummary.flexBank.includes("+")
+                      ? "bg-primary-50 text-primary-700 ring-primary-700/10"
+                      : "bg-red-50 text-red-700 ring-red-600/20"
+                  } ring-1 ring-inset`}
+                >
+                  {dailySummary.flexBank}
+                </span>
+              </div>
+            </div>
+          </Card>
+        )}
         {/* Timeline Visualization */}
         {calculationResult && (
           <Card title="Timeline Visualization" icon={<FaClock size={20} />}>
