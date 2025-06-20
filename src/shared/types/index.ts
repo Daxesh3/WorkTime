@@ -48,15 +48,15 @@ export interface LunchBreak {
   flexWindowEnd: string;
 }
 
-export interface Break {
+export interface ConfiguredBreak {
   defaultTime: string;
   duration: number;
   enabled?: boolean;
 }
 
 export interface Breaks {
-  morning: Break;
-  afternoon: Break;
+  morning: ConfiguredBreak;
+  afternoon: ConfiguredBreak;
 }
 
 export interface EarlyArrival {
@@ -105,7 +105,7 @@ export interface EmployeeRecord {
   lunchEnd: string; // Lunch end time in HH:mm format
   company: string;
   shift: ShiftTiming;
-  breaks: Break[]; // List of additional breaks
+  breaks: Break[]; // List of additional breaks (this now refers to the other Break interface)
   dateId?: string | null;
   flexBank?: number; // Flex bank in minutes
 }
@@ -119,7 +119,7 @@ export interface Break {
 export interface Parameters {
   workingHours: WorkingHours;
   lunchBreak: LunchBreak;
-  // breaks: Breaks;
+  // breaks: Breaks; // This should be updated if using ConfiguredBreaks
   earlyArrival: EarlyArrival;
   lateStay: LateStay;
 }

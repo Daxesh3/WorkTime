@@ -15,9 +15,13 @@ import Card from "../../components/ui/Card";
 import useWorkTimeStore from "../../store/workTimeStore";
 import AddEditEmployee from "./AddEditEmployee";
 import TitleText from "../../components/ui/header";
-import WeeklyBreakdownModal from "../../components/ui/WeeklyBreakdownModal";
+import WeeklyBreakdownModal, {
+  DailyRecord,
+} from "../../components/ui/WeeklyBreakdownModal";
 import EmployeeDetailsModal from "../Calculation/EmployeeDetailsPopup";
 import { EmployeeRecord } from "../../shared/types";
+import useCompanyStore from "../../store/companyStore";
+import { calculateWeeklySummary } from "../../utils/weeklySummary";
 
 interface TimeCell {
   hours: string;
@@ -34,11 +38,12 @@ interface EmployeeWeeklyData {
 
 const EmployeeSchedule: React.FC = () => {
   const { employeeRecords, deleteEmployeeRecord } = useWorkTimeStore();
+  const { companies } = useCompanyStore();
   const [isAddingRecord, setIsAddingRecord] = useState<boolean>(false);
   const [editingDateId, setEditingDateId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [isBreakdownModalOpen, setIsBreakdownModalOpen] = useState(false);
+  const [isBreakdownModalOpen, setIsBreakdownModal] = useState(false);
   const [selectedEmployeeData, setSelectedEmployeeData] =
     useState<EmployeeWeeklyData | null>(null);
   const [userCalculation, setUserCalculation] = useState<
@@ -61,6 +66,20 @@ const EmployeeSchedule: React.FC = () => {
       }),
     [employeeRecords, weekStart, weekEnd]
   );
+
+  // Calculate weekly summary using the new utility function
+  const weeklySummary = useMemo(() => {
+    if (!selectedEmployeeData || companies.length === 0) return null;
+    const allCompanyShifts = companies[0].shifts;
+
+    return calculateWeeklySummary(
+      employeeRecords,
+      allCompanyShifts,
+      selectedEmployeeData.id,
+      weekStart,
+      weekEnd
+    );
+  }, [employeeRecords, companies, selectedEmployeeData, weekStart, weekEnd]);
 
   // Transform records into weekly data
   const weeklyData = useMemo(() => {
@@ -265,7 +284,7 @@ const EmployeeSchedule: React.FC = () => {
                     className="px-4 py-2 border-b border-neutral-200 bg-blue-100 cursor-pointer hover:bg-blue-50"
                     onClick={() => {
                       setSelectedEmployeeData(employee);
-                      setIsBreakdownModalOpen(true);
+                      setIsBreakdownModal(true);
                     }}
                   >
                     {employee.totalHours}
@@ -322,111 +341,13 @@ const EmployeeSchedule: React.FC = () => {
       <WeeklyBreakdownModal
         isOpen={isBreakdownModalOpen}
         onClose={() => {
-          setIsBreakdownModalOpen(false);
+          setIsBreakdownModal(false);
           setSelectedEmployeeData(null);
         }}
         dailyRecords={
-          selectedEmployeeData
-            ? weekDays.map((day) => {
-                const record = filteredRecords.find(
-                  (r) =>
-                    r.id === selectedEmployeeData.id &&
-                    r.date === format(day, "yyyy-MM-dd")
-                );
-                if (!record) {
-                  return {
-                    date: format(day, "MMM dd, yyyy"),
-                    clockIn: "-",
-                    clockOut: "-",
-                    lunchStart: "",
-                    lunchEnd: "",
-                    breaks: [],
-                    totalHours: 0,
-                  };
-                }
-                return {
-                  date: format(day, "MMM dd, yyyy"),
-                  clockIn: record.clockIn,
-                  clockOut: record.clockOut,
-                  lunchStart: record.lunchStart,
-                  lunchEnd: record.lunchEnd,
-                  breaks: record.breaks,
-                  totalHours: (() => {
-                    const clockIn = new Date(`2000-01-01T${record.clockIn}`);
-                    const clockOut = new Date(`2000-01-01T${record.clockOut}`);
-                    const lunchStart = new Date(
-                      `2000-01-01T${record.lunchStart}`
-                    );
-                    const lunchEnd = new Date(`2000-01-01T${record.lunchEnd}`);
-                    const breakMinutes = record.breaks.reduce(
-                      (total, breakItem) => {
-                        const breakStart = new Date(
-                          `2000-01-01T${breakItem.start}`
-                        );
-                        const breakEnd = new Date(
-                          `2000-01-01T${breakItem.end}`
-                        );
-                        return (
-                          total +
-                          (breakEnd.getTime() - breakStart.getTime()) /
-                            (1000 * 60)
-                        );
-                      },
-                      0
-                    );
-                    const totalMinutes =
-                      (clockOut.getTime() - clockIn.getTime()) / (1000 * 60) -
-                      (lunchEnd.getTime() - lunchStart.getTime()) /
-                        (1000 * 60) -
-                      breakMinutes;
-                    return totalMinutes / 60;
-                  })(),
-                };
-              })
-            : []
+          weeklySummary ? (weeklySummary.dailySummaries as DailyRecord[]) : []
         }
-        weeklyTotal={
-          selectedEmployeeData
-            ? filteredRecords
-                .filter((record) => record.id === selectedEmployeeData.id)
-                .reduce((total, record) => {
-                  const clockIn = new Date(`2000-01-01T${record.clockIn}`);
-                  const clockOut = new Date(`2000-01-01T${record.clockOut}`);
-                  const lunchStart = new Date(
-                    `2000-01-01T${record.lunchStart}`
-                  );
-                  const lunchEnd = new Date(`2000-01-01T${record.lunchEnd}`);
-                  const breakMinutes = record.breaks.reduce(
-                    (total, breakItem) => {
-                      const breakStart = new Date(
-                        `2000-01-01T${breakItem.start}`
-                      );
-                      const breakEnd = new Date(`2000-01-01T${breakItem.end}`);
-                      return (
-                        total +
-                        (breakEnd.getTime() - breakStart.getTime()) /
-                          (1000 * 60)
-                      );
-                    },
-                    0
-                  );
-                  const tempWorkingHours =
-                    (clockOut.getTime() - clockIn.getTime()) / (1000 * 60) -
-                    (lunchEnd.getTime() - lunchStart.getTime()) / (1000 * 60);
-                  if (tempWorkingHours < 0) {
-                    const totalMinutes = 1140 - tempWorkingHours - breakMinutes;
-                    return total + totalMinutes / 60;
-                  } else {
-                    const totalMinutes =
-                      (clockOut.getTime() - clockIn.getTime()) / (1000 * 60) -
-                      (lunchEnd.getTime() - lunchStart.getTime()) /
-                        (1000 * 60) -
-                      breakMinutes;
-                    return total + totalMinutes / 60;
-                  }
-                }, 0)
-            : 0
-        }
+        weeklyTotal={weeklySummary ? weeklySummary.weeklyActualHours : "00:00"}
       />
     </>
   );

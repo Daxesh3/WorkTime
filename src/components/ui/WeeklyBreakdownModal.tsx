@@ -2,21 +2,26 @@ import React from "react";
 import { FaTimes } from "react-icons/fa";
 import Modal from "./Modal";
 
-interface DailyRecord {
+export interface DailyRecord {
   date: string;
-  clockIn: string;
-  clockOut: string;
-  lunchStart: string;
-  lunchEnd: string;
-  breaks: Array<{ start: string; end: string }>;
-  totalHours: number;
+  inTime: string;
+  outTime: string;
+  lunchPeriod: string; // e.g., "12:00 - 12:30"
+  totalTime: string; // From in to out, e.g., "08:21"
+  minBreak: string; // e.g., "0:30"
+  takenBreaks: string; // e.g., "0:30" or "0:35"
+  totalWorkingHours: string; // After all breaks, e.g., "7:51 h"
+  requiredHours: string; // e.g., "07:30 h"
+  flexHours: string; // e.g., "+00:21 H" or "-00:20 H"
+  flexBank: string; // e.g., "00:00 + 00:21" or "00:21 + 00:34"
+  dailyFlexTimeChangeDirection: "added" | "removed"; // To assist with styling
 }
 
 interface WeeklyBreakdownModalProps {
   isOpen: boolean;
   onClose: () => void;
   dailyRecords: DailyRecord[];
-  weeklyTotal: number;
+  weeklyTotal: string; // Change to string as it will be HH:MM format from weeklySummary
 }
 
 const WeeklyBreakdownModal: React.FC<WeeklyBreakdownModalProps> = ({
@@ -27,37 +32,13 @@ const WeeklyBreakdownModal: React.FC<WeeklyBreakdownModalProps> = ({
 }) => {
   if (!isOpen) return null;
 
-  const formatTime = (time: string) => {
-    return time;
-  };
-
-  const calculateBreakDuration = (
-    breaks: Array<{ start: string; end: string }>
-  ) => {
-    return breaks.reduce((total, breakItem) => {
-      const start = new Date(`2000-01-01T${breakItem.start}`);
-      const end = new Date(`2000-01-01T${breakItem.end}`);
-      return total + (end.getTime() - start.getTime()) / (1000 * 60);
-    }, 0);
-  };
-
-  const calculateLunchDuration = (lunchStart: string, lunchEnd: string) => {
-    if (lunchStart === "-" || lunchEnd === "-") return 0;
-    const start = new Date(`2000-01-01T${lunchStart}`);
-    const end = new Date(`2000-01-01T${lunchEnd}`);
-    return (end.getTime() - start.getTime()) / (1000 * 60);
-  };
-
-  const formatDuration = (minutes: number) => {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return `${hours}:${mins.toString().padStart(2, "0")}`;
-  };
-
-  const formatTotalHours = (decimalHours: number) => {
-    const hours = Math.floor(decimalHours);
-    const minutes = Math.round((decimalHours - hours) * 60);
-    return `${hours}:${minutes.toString().padStart(2, "0")}`;
+  // This formatting function is for consistency if needed, but weeklyTotal will be pre-formatted.
+  const formatHoursAndMinutes = (totalMinutes: number) => {
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = Math.round(totalMinutes % 60);
+    return `${hours.toString().padStart(2, "0")}:${minutes
+      .toString()
+      .padStart(2, "0")}`;
   };
 
   return (
@@ -99,13 +80,43 @@ const WeeklyBreakdownModal: React.FC<WeeklyBreakdownModalProps> = ({
                 scope="col"
                 className="py-3.5 px-4 text-left text-sm font-semibold text-neutral-900"
               >
-                Breaks
+                Total time
               </th>
               <th
                 scope="col"
                 className="py-3.5 px-4 text-left text-sm font-semibold text-neutral-900"
               >
-                Total
+                Min break
+              </th>
+              <th
+                scope="col"
+                className="py-3.5 px-4 text-left text-sm font-semibold text-neutral-900"
+              >
+                Taken Breaks
+              </th>
+              <th
+                scope="col"
+                className="py-3.5 px-4 text-left text-sm font-semibold text-neutral-900"
+              >
+                Total working hour
+              </th>
+              <th
+                scope="col"
+                className="py-3.5 px-4 text-left text-sm font-semibold text-neutral-900"
+              >
+                Required hours
+              </th>
+              <th
+                scope="col"
+                className="py-3.5 px-4 text-left text-sm font-semibold text-neutral-900"
+              >
+                Flex hours
+              </th>
+              <th
+                scope="col"
+                className="py-3.5 px-4 text-left text-sm font-semibold text-neutral-900"
+              >
+                Flex bank
               </th>
             </tr>
           </thead>
@@ -116,32 +127,59 @@ const WeeklyBreakdownModal: React.FC<WeeklyBreakdownModalProps> = ({
                   {record.date}
                 </td>
                 <td className="whitespace-nowrap py-2 px-4 text-sm text-neutral-600">
-                  {formatTime(record.clockIn)}
+                  {record.inTime}
                 </td>
                 <td className="whitespace-nowrap py-2 px-4 text-sm text-neutral-600">
-                  {formatTime(record.clockOut)}
+                  {record.outTime}
                 </td>
                 <td className="whitespace-nowrap py-2 px-4 text-sm text-neutral-600">
                   <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
-                    {formatTime(record.lunchStart)} -{" "}
-                    {formatTime(record.lunchEnd)}
+                    {record.lunchPeriod}
                   </span>
                 </td>
                 <td className="whitespace-nowrap py-2 px-4 text-sm text-neutral-600">
-                  <span className="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
-                    {record.lunchStart
-                      ? formatDuration(
-                          calculateLunchDuration(
-                            record.lunchStart,
-                            record.lunchEnd
-                          )
-                        )
-                      : "-"}
+                  {record.totalTime}
+                </td>
+                <td className="whitespace-nowrap py-2 px-4 text-sm text-neutral-600">
+                  {record.minBreak}
+                </td>
+                <td className="whitespace-nowrap py-2 px-4 text-sm text-neutral-600">
+                  <span
+                    className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${
+                      record.dailyFlexTimeChangeDirection === "added"
+                        ? "bg-green-50 text-green-700 ring-green-600/20"
+                        : "bg-red-50 text-red-700 ring-red-600/20"
+                    } ring-1 ring-inset`}
+                  >
+                    {record.takenBreaks}
                   </span>
                 </td>
                 <td className="whitespace-nowrap py-2 px-4 text-sm font-medium text-neutral-900">
-                  <span className="inline-flex items-center rounded-md bg-primary-50 px-2 py-1 text-xs font-medium text-primary-700 ring-1 ring-inset ring-primary-700/10">
-                    {formatTotalHours(record.totalHours)} h
+                  {record.totalWorkingHours}
+                </td>
+                <td className="whitespace-nowrap py-2 px-4 text-sm text-neutral-600">
+                  {record.requiredHours}
+                </td>
+                <td className="whitespace-nowrap py-2 px-4 text-sm text-neutral-600">
+                  <span
+                    className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${
+                      record.dailyFlexTimeChangeDirection === "added"
+                        ? "bg-green-50 text-green-700 ring-green-600/20"
+                        : "bg-red-50 text-red-700 ring-red-600/20"
+                    } ring-1 ring-inset`}
+                  >
+                    {record.flexHours}
+                  </span>
+                </td>
+                <td className="whitespace-nowrap py-2 px-4 text-sm font-medium text-neutral-900">
+                  <span
+                    className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${
+                      record.flexBank.includes("+")
+                        ? "bg-primary-50 text-primary-700 ring-primary-700/10"
+                        : "bg-red-50 text-red-700 ring-red-600/20"
+                    } ring-1 ring-inset`}
+                  >
+                    {record.flexBank}
                   </span>
                 </td>
               </tr>
@@ -150,14 +188,14 @@ const WeeklyBreakdownModal: React.FC<WeeklyBreakdownModalProps> = ({
           <tfoot className="bg-neutral-50">
             <tr>
               <td
-                colSpan={5}
+                colSpan={10} // Adjusted colspan to match new number of columns (11 - 1 for total column)
                 className="py-2 px-4 text-right text-sm font-semibold text-neutral-900"
               >
                 Weekly Total:
               </td>
               <td className="py-2 px-4 text-sm font-semibold text-neutral-900">
                 <span className="inline-flex items-center rounded-md bg-primary-100 px-2.5 py-1 text-sm font-medium text-primary-700 ring-1 ring-inset ring-primary-700/10">
-                  {formatTotalHours(weeklyTotal)} h
+                  {weeklyTotal} h
                 </span>
               </td>
             </tr>
