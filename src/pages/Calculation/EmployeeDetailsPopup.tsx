@@ -53,6 +53,7 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
     user?.company || "",
     user?.shift?.id || ""
   );
+  console.log("🚀 ~ shiftParameters:", shiftParameters);
 
   // Sample record for simulation
   const [simulationRecord, setSimulationRecord] = useState<SimulationRecord>({
@@ -169,6 +170,7 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
   const flexBankForThisDay = useMemo(() => {
     if (!user) return 0;
     const rec = employeeRecordsWithFlex.find((r) => r.date === user.date);
+    console.log("🚀 ~ flexBankForThisDay ~ rec:", rec);
     return rec?.flexBank || 0;
   }, [employeeRecordsWithFlex, user]);
 
@@ -195,7 +197,10 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
       <div className="space-y-6">
         {/* Timeline Visualization */}
         {calculationResult && (
-          <Card title="Timeline Visualization" icon={<FaClock size={20} />}>
+          <Card
+            title="Timeline Visualization"
+            icon={<FaClock size={20} />}
+          >
             <WorkingHoursTimeline
               inTime={simulationRecord.clockIn}
               outTime={simulationRecord.clockOut}
@@ -218,7 +223,8 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
                   calculationResult.totalWorkingMinutes
                 ),
                 required: calculationResult.regularHours,
-                lunch: `${calculationResult.lunchDuration} min`,
+                givenLunch: `${shiftParameters.lunchBreak.duration} min`,
+                takenLunch: `${calculationResult.lunchDuration} min`,
                 flex: formatHHmm(flexBankForThisDay),
               }}
             />
