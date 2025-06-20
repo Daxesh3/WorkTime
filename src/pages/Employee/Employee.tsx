@@ -347,7 +347,7 @@ const EmployeeSchedule: React.FC = () => {
         dailyRecords={
           weeklySummary ? (weeklySummary.dailySummaries as DailyRecord[]) : []
         }
-        weeklyTotal={weeklySummary ? weeklySummary.weeklyActualHours : "00:00"}
+        weeklySummary={weeklySummary}
       />
     </>
   );

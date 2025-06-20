@@ -17,18 +17,27 @@ export interface DailyRecord {
   dailyFlexTimeChangeDirection: "added" | "removed"; // To assist with styling
 }
 
+interface WeeklySummary {
+  weeklyRequiredHours: string;
+  weeklyActualHours: string;
+  weeklyFlexTimeAddedRemoved: string;
+  flexBankStartOfWeek: string;
+  flexBankEnd: string;
+  dailySummaries: DailyRecord[];
+}
+
 interface WeeklyBreakdownModalProps {
   isOpen: boolean;
   onClose: () => void;
   dailyRecords: DailyRecord[];
-  weeklyTotal: string; // Change to string as it will be HH:MM format from weeklySummary
+  weeklySummary: WeeklySummary | null; // Updated to accept the entire weeklySummary object
 }
 
 const WeeklyBreakdownModal: React.FC<WeeklyBreakdownModalProps> = ({
   isOpen,
   onClose,
   dailyRecords,
-  weeklyTotal,
+  weeklySummary,
 }) => {
   if (!isOpen) return null;
 
@@ -188,14 +197,46 @@ const WeeklyBreakdownModal: React.FC<WeeklyBreakdownModalProps> = ({
           <tfoot className="bg-neutral-50">
             <tr>
               <td
-                colSpan={10} // Adjusted colspan to match new number of columns (11 - 1 for total column)
+                colSpan={7} // Adjusted colspan to match new number of columns (11 - 4 for totals)
                 className="py-2 px-4 text-right text-sm font-semibold text-neutral-900"
               >
                 Weekly Total:
               </td>
               <td className="py-2 px-4 text-sm font-semibold text-neutral-900">
                 <span className="inline-flex items-center rounded-md bg-primary-100 px-2.5 py-1 text-sm font-medium text-primary-700 ring-1 ring-inset ring-primary-700/10">
-                  {weeklyTotal} h
+                  {weeklySummary ? weeklySummary.weeklyActualHours : "00:00"} h
+                </span>
+              </td>
+              <td className="py-2 px-4 text-sm font-semibold text-neutral-900">
+                <span className="inline-flex items-center rounded-md bg-primary-100 px-2.5 py-1 text-sm font-medium text-primary-700 ring-1 ring-inset ring-primary-700/10">
+                  {weeklySummary ? weeklySummary.weeklyRequiredHours : "00:00"}{" "}
+                  h
+                </span>
+              </td>
+              <td className="py-2 px-4 text-sm font-semibold text-neutral-900">
+                <span
+                  className={`inline-flex items-center rounded-md px-2.5 py-1 text-sm font-medium ${
+                    weeklySummary &&
+                    weeklySummary.weeklyFlexTimeAddedRemoved.includes("+")
+                      ? "bg-green-50 text-green-700 ring-green-600/20"
+                      : "bg-red-50 text-red-700 ring-red-600/20"
+                  } ring-1 ring-inset`}
+                >
+                  {weeklySummary
+                    ? weeklySummary.weeklyFlexTimeAddedRemoved
+                    : "00:00"}{" "}
+                  H
+                </span>
+              </td>
+              <td className="py-2 px-4 text-sm font-semibold text-neutral-900">
+                <span
+                  className={`inline-flex items-center rounded-md px-2.5 py-1 text-sm font-medium ${
+                    weeklySummary && weeklySummary.flexBankEnd.includes("+")
+                      ? "bg-primary-100 text-primary-700 ring-primary-700/10"
+                      : "bg-red-50 text-red-700 ring-red-600/20"
+                  } ring-1 ring-inset`}
+                >
+                  {weeklySummary ? weeklySummary.flexBankEnd : "00:00"} H
                 </span>
               </td>
             </tr>

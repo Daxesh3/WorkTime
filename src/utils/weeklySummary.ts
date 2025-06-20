@@ -294,9 +294,15 @@ export function calculateWeeklySummary(
   return {
     weeklyRequiredHours: minutesToHHMM(weeklyRequiredMinutes),
     weeklyActualHours: minutesToHHMM(weeklyActualMinutes),
-    weeklyFlexTimeAddedRemoved: minutesToHHMM(weeklyFlexTimeChangeMinutes),
+    weeklyFlexTimeAddedRemoved: `${
+      weeklyFlexTimeChangeMinutes >= 0 && weeklyFlexTimeChangeMinutes !== 0
+        ? "+"
+        : ""
+    }${minutesToHHMM(weeklyFlexTimeChangeMinutes)}`,
     flexBankStartOfWeek: minutesToHHMM(flexBankStartOfWeekMinutes),
-    flexBankEnd: minutesToHHMM(flexBankEndOfWeekMinutes),
+    flexBankEnd: `${
+      flexBankEndOfWeekMinutes >= 0 && flexBankEndOfWeekMinutes !== 0 ? "+" : ""
+    }${minutesToHHMM(flexBankEndOfWeekMinutes)}`,
     dailySummaries: dailySummariesWithFlexBank,
   };
 }
