@@ -131,7 +131,10 @@ const WeeklyBreakdownModal: React.FC<WeeklyBreakdownModalProps> = ({
           </thead>
           <tbody className="divide-y divide-neutral-200 bg-white">
             {dailyRecords.map((record, index) => (
-              <tr key={index} className="transition-colors hover:bg-neutral-50">
+              <tr
+                key={index}
+                className="transition-colors hover:bg-neutral-50"
+              >
                 <td className="whitespace-nowrap py-2 px-4 text-sm text-neutral-600">
                   {record.date}
                 </td>
@@ -203,12 +206,12 @@ const WeeklyBreakdownModal: React.FC<WeeklyBreakdownModalProps> = ({
                 Weekly Total:
               </td>
               <td className="py-2 px-4 text-sm font-semibold text-neutral-900">
-                <span className="inline-flex items-center rounded-md bg-primary-100 px-2.5 py-1 text-sm font-medium text-primary-700 ring-1 ring-inset ring-primary-700/10">
+                <span className="inline-flex items-center rounded-md bg-primary-100 px-2.5 py-1 text-sm font-medium text-primary-700 ring-1 ring-inset ring-primary-700/10 w-max">
                   {weeklySummary ? weeklySummary.weeklyActualHours : "00:00"} h
                 </span>
               </td>
               <td className="py-2 px-4 text-sm font-semibold text-neutral-900">
-                <span className="inline-flex items-center rounded-md bg-primary-100 px-2.5 py-1 text-sm font-medium text-primary-700 ring-1 ring-inset ring-primary-700/10">
+                <span className="inline-flex items-center rounded-md bg-primary-100 px-2.5 py-1 text-sm font-medium text-primary-700 ring-1 ring-inset ring-primary-700/10 w-max">
                   {weeklySummary ? weeklySummary.weeklyRequiredHours : "00:00"}{" "}
                   h
                 </span>
