@@ -140,9 +140,13 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
         : ""
     }${minutesToHHMM(data.dailyFlexTimeChangeMinutes)} H`;
 
-    const flexBankFormatted = `${minutesToHHMM(flexBankForThisDay)} ${
+    const previousDayFlexBankMinutes =
+      flexBankForThisDay - data.dailyFlexTimeChangeMinutes;
+    const flexBankFormatted = `${minutesToHHMM(previousDayFlexBankMinutes)} ${
       data.dailyFlexTimeChangeMinutes >= 0 ? "+" : "-"
-    } ${minutesToHHMM(Math.abs(data.dailyFlexTimeChangeMinutes))}`;
+    } ${minutesToHHMM(
+      Math.abs(data.dailyFlexTimeChangeMinutes)
+    )} = ${minutesToHHMM(flexBankForThisDay)}`;
 
     // Construct DailyRecord like object for display consistency
     return {
@@ -340,10 +344,7 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
         )} */}
         {/* Timeline Visualization */}
         {calculationResult && (
-          <Card
-            title="Timeline Visualization"
-            icon={<FaClock size={20} />}
-          >
+          <Card title="Timeline Visualization" icon={<FaClock size={20} />}>
             <WorkingHoursTimeline
               inTime={simulationRecord.clockIn}
               outTime={simulationRecord.clockOut}
