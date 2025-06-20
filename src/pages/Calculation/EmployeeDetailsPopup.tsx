@@ -235,8 +235,11 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
     >
       <div className="space-y-6">
         {/* Daily Summary Card */}
-        {dailySummary && (
-          <Card title="Daily Summary" icon={<FaChartPie size={20} />}>
+        {/*   {dailySummary && (
+          <Card
+            title="Daily Summary"
+            icon={<FaChartPie size={20} />}
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
               <div className="flex flex-col">
                 <span className="font-medium text-neutral-700">Day:</span>
@@ -251,16 +254,32 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
                 <span className="text-neutral-900">{dailySummary.outTime}</span>
               </div>
               <div className="flex flex-col">
-                <span className="font-medium text-neutral-700">Lunch:</span>
-                <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
-                  {dailySummary.lunchPeriod}
+                <span className="font-medium text-neutral-700">
+                  Required hours:
+                </span>
+                <span className="text-neutral-900">
+                  {dailySummary.requiredHours}
+                </span>
+              </div>
+              <div className="flex flex-col">
+                <span className="font-medium text-neutral-700">
+                  Total working hour:
+                </span>
+                <span
+                  className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${
+                    dailySummary.requiredHours <= dailySummary.totalWorkingHours
+                      ? "bg-green-50 text-green-700 ring-green-600/20"
+                      : "bg-red-50 text-red-700 ring-red-600/20"
+                  } ring-1 ring-inset`}
+                >
+                  {dailySummary.totalWorkingHours}
                 </span>
               </div>
               <div className="flex flex-col">
                 <span className="font-medium text-neutral-700">
                   Total time:
                 </span>
-                <span className="text-neutral-900">
+                <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
                   {dailySummary.totalTime}
                 </span>
               </div>
@@ -271,33 +290,23 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
                 </span>
               </div>
               <div className="flex flex-col">
+                <span className="font-medium text-neutral-700">Lunch:</span>
+                <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                  {dailySummary.lunchPeriod}
+                </span>
+              </div>
+              <div className="flex flex-col">
                 <span className="font-medium text-neutral-700">
                   Taken Breaks:
                 </span>
                 <span
                   className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ${
-                    dailySummary.dailyFlexTimeChangeDirection === "added"
+                    dailySummary.minBreak >= dailySummary.takenBreaks
                       ? "bg-green-50 text-green-700 ring-green-600/20"
                       : "bg-red-50 text-red-700 ring-red-600/20"
                   } ring-1 ring-inset`}
                 >
                   {dailySummary.takenBreaks}
-                </span>
-              </div>
-              <div className="flex flex-col">
-                <span className="font-medium text-neutral-700">
-                  Total working hour:
-                </span>
-                <span className="text-neutral-900">
-                  {dailySummary.totalWorkingHours}
-                </span>
-              </div>
-              <div className="flex flex-col">
-                <span className="font-medium text-neutral-700">
-                  Required hours:
-                </span>
-                <span className="text-neutral-900">
-                  {dailySummary.requiredHours}
                 </span>
               </div>
               <div className="flex flex-col">
@@ -328,10 +337,13 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
               </div>
             </div>
           </Card>
-        )}
+        )} */}
         {/* Timeline Visualization */}
         {calculationResult && (
-          <Card title="Timeline Visualization" icon={<FaClock size={20} />}>
+          <Card
+            title="Timeline Visualization"
+            icon={<FaClock size={20} />}
+          >
             <WorkingHoursTimeline
               inTime={simulationRecord.clockIn}
               outTime={simulationRecord.clockOut}
@@ -350,12 +362,17 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
                 end: simulationRecord.lunchEnd,
               }}
               calculation={{
-                actualWorking: formatHHmm(
-                  calculationResult.totalWorkingMinutes
-                ),
-                required: calculationResult.regularHours,
-                lunch: `${calculationResult.lunchDuration} min`,
-                flex: formatHHmm(flexBankForThisDay),
+                actualWorking: dailySummary?.totalWorkingHours,
+                totalTime: dailySummary?.totalTime,
+                required: dailySummary?.requiredHours,
+                lunch: `${dailySummary?.minBreak} h`,
+                lunchTime: `${dailySummary?.lunchPeriod}`,
+                takenLunchTime: `${dailySummary?.takenBreaks}`,
+                flex: `${dailySummary?.flexBank}`,
+                flexHours: dailySummary?.flexHours,
+                minBreak: dailySummary?.minBreak,
+                dailyFlexTimeChangeDirection:
+                  dailySummary?.dailyFlexTimeChangeDirection,
               }}
             />
           </Card>

@@ -6,10 +6,16 @@ interface WorkingHoursTimelineProps {
   workingPeriods: { start: string; end: string }[];
   lunchPeriod: { start: string; end: string };
   calculation: {
-    actualWorking: string;
-    required: string;
+    actualWorking: string | undefined;
+    required: string | undefined;
+    totalTime: string | undefined;
     lunch: string;
+    lunchTime: string;
+    takenLunchTime: string;
     flex: string;
+    minBreak: string | undefined;
+    dailyFlexTimeChangeDirection: "added" | "removed" | undefined;
+    flexHours: string | undefined;
   };
 }
 
@@ -142,45 +148,78 @@ const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
       </div>
 
       {/* Calculation Summary */}
-      <div className="mt-20 pt-8 border-t border-slate-200">
-        <h4 className="text-lg font-semibold text-slate-800 mb-4">
+      <div className="mt-20 pt-14 border-t border-slate-200">
+        {/* <h4 className="text-lg font-semibold text-slate-800 mb-4">
           Daily Summary
-        </h4>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-            <div className="text-sm text-slate-600 mb-1">Actual Working</div>
-            <div className="text-lg font-semibold text-slate-800">
+        </h4> */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-3 text-sm">
+          <div className="flex flex-col">
+            <span className="font-medium text-neutral-700">Total time:</span>
+            <span className="text-neutral-900 mt-1">
+              {calculation.totalTime}
+            </span>
+          </div>
+          <div className="flex flex-col">
+            <span className="font-medium text-neutral-700">Lunch time:</span>
+            <span className="text-neutral-900 mt-1">
+              {calculation.lunchTime}
+            </span>
+          </div>
+          <div className="flex flex-col">
+            <span className="font-medium text-neutral-700">Taken breaks:</span>
+            <span className="text-neutral-900 mt-1">
+              {calculation.takenLunchTime}
+            </span>
+          </div>
+          <div className="flex flex-col">
+            <span className="font-medium text-neutral-700">Actual hours:</span>
+            <span className="text-neutral-900 mt-1">
               {calculation.actualWorking}
-            </div>
+            </span>
           </div>
-          <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-            <div className="text-sm text-slate-600 mb-1">Required Hours</div>
-            <div className="text-lg font-semibold text-slate-800">
+          <div className="flex flex-col">
+            <span className="font-medium text-neutral-700">
+              Required hours:
+            </span>
+            <span className="text-neutral-900 mt-1">
               {calculation.required}
-            </div>
+            </span>
           </div>
-          <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-            <div className="text-sm text-slate-600 mb-1">Lunch Time</div>
-            <div className="text-lg font-semibold text-slate-800">
-              {calculation.lunch}
-            </div>
+
+          {/* <div className="flex flex-col">
+            <span className="font-medium text-neutral-700">Min lunch:</span>
+            <span className="text-neutral-900 mt-1">
+              {calculation.minBreak}
+            </span>
+          </div> */}
+          <div className="flex flex-col">
+            <span className="font-medium text-neutral-700">Flex hours:</span>
+            <span className="text-neutral-900 mt-1">
+              {calculation.flexHours}
+            </span>
           </div>
-          <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-            <div className="text-sm text-slate-600 mb-1">Flex Time</div>
-            <div className="text-lg font-semibold text-slate-800">
-              {calculation.flex}
-            </div>
+
+          <div className="flex flex-col">
+            <span className="font-medium text-neutral-700">Flex bank:</span>
+            <span className="text-neutral-900 mt-1">{calculation.flex}</span>
           </div>
+
+          {/* <div className="flex flex-col">
+            <span className="font-medium text-neutral-700">Taken breaks:</span>
+            <span className="text-neutral-900 mt-1">
+              {calculation.takenLunchTime}
+            </span>
+          </div> */}
         </div>
       </div>
 
       {/* Legend */}
       <div className="mt-6 pt-6 border-t border-slate-200">
         <div className="flex flex-wrap gap-6 text-sm">
-          <div className="flex items-center gap-2">
+          {/* <div className="flex items-center gap-2">
             <div className="w-4 h-4 bg-emerald-500 rounded-full"></div>
             <span className="text-slate-700">Clock In/Out</span>
-          </div>
+          </div> */}
           <div className="flex items-center gap-2">
             <div className="w-4 h-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"></div>
             <span className="text-slate-700">Working Time</span>
