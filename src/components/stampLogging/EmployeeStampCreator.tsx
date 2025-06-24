@@ -19,7 +19,7 @@ const EmployeeStampCreator: React.FC<EmployeeStampCreatorProps> = ({
   const { getEffectiveStamps, addStampRecord } = useStampConfig();
   const [employeeName, setEmployeeName] = useState("");
   const [selectedStampType, setSelectedStampType] = useState("");
-  const [selectedShift, setSelectedShift] = useState<ShiftType>("morning");
+  const [selectedShift, setSelectedShift] = useState<ShiftType>("regular");
 
   const [stampTime, setStampTime] = useState(
     new Date().toISOString().slice(0, 16)
@@ -32,7 +32,6 @@ const EmployeeStampCreator: React.FC<EmployeeStampCreatorProps> = ({
     () => companies.find((company) => company.id === companyId),
     [companies, companyId]
   );
-  console.log("🚀 ~ companyDetails:", companyDetails);
 
   const availableStamps = getEffectiveStamps(companyId);
 
@@ -121,12 +120,40 @@ const EmployeeStampCreator: React.FC<EmployeeStampCreatorProps> = ({
           </div>
         </div>
 
-        <ShiftTypeSelector
+        {/* <ShiftTypeSelector
           company={companyDetails?.name}
           value={selectedShift}
           onChange={(value) => setSelectedShift(value)}
-        />
-
+        /> */}
+        <div>
+          <label className="input-label">Shift Type</label>
+          <div className="flex flex-wrap gap-2">
+            {companyDetails?.shifts.map((shift) => (
+              <label
+                key={shift.id}
+                className={`flex items-center gap-2 p-2 border rounded-lg cursor-pointer ${
+                  selectedShift === shift.name
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-300"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="shiftType"
+                  value={shift.name}
+                  checked={selectedShift === shift.name}
+                  onChange={(e) =>
+                    setSelectedShift(e.target.value as ShiftType)
+                  }
+                  className="hidden"
+                />
+                <span className="text-sm font-medium capitalize">
+                  {shift.name}
+                </span>
+              </label>
+            ))}
+          </div>
+        </div>
         <div>
           <label className="input-label">Stamp Time</label>
           <input
