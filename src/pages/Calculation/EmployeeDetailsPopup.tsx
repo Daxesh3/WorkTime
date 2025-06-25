@@ -344,7 +344,10 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
         )} */}
         {/* Timeline Visualization */}
         {calculationResult && (
-          <Card title="Timeline Visualization" icon={<FaClock size={20} />}>
+          <Card
+            title="Timeline Visualization"
+            icon={<FaClock size={20} />}
+          >
             <WorkingHoursTimeline
               inTime={simulationRecord.clockIn}
               outTime={simulationRecord.clockOut}
@@ -418,11 +421,31 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
                 }
                 return [];
               })()}
+              overtimeBreakdown={(() => {
+                if (
+                  user?.overtimeStart &&
+                  user?.overtimeEnd &&
+                  shiftParameters?.overtime
+                ) {
+                  const breaks = [
+                    { start: user.lunchStart, end: user.lunchEnd },
+                    ...(user.breaks || []),
+                  ];
+                  const segments = calculateOvertimeSegments({
+                    overtimeStart: user.overtimeStart,
+                    overtimeEnd: user.overtimeEnd,
+                    breaks,
+                    shift: shiftParameters,
+                  });
+                  return segments;
+                }
+                return [];
+              })()}
             />
           </Card>
         )}
         {/* Overtime Breakdown Card (separate) */}
-        {user?.overtimeStart &&
+        {/*  {user?.overtimeStart &&
           user?.overtimeEnd &&
           shiftParameters?.overtime &&
           (() => {
@@ -445,7 +468,12 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
               <Card
                 className="mt-4"
                 title="Overtime Breakdown"
-                icon={<FaClock size={20} className="text-yellow-600" />}
+                icon={
+                  <FaClock
+                    size={20}
+                    className="text-yellow-600"
+                  />
+                }
               >
                 <div className="flex flex-wrap gap-4 text-sm">
                   <div>
@@ -466,7 +494,7 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
                 </div>
               </Card>
             );
-          })()}
+          })()} */}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">

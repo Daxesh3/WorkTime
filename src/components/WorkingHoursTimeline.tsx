@@ -18,6 +18,11 @@ interface WorkingHoursTimelineProps {
     flexHours: string | undefined;
   };
   overtimePeriods?: { start: string; end: string; multiplier: number }[];
+  overtimeBreakdown?: {
+    duration: number;
+    multiplier: number;
+    durationHHMM: string;
+  }[]; // New prop
 }
 
 const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
@@ -27,6 +32,7 @@ const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
   lunchPeriod,
   calculation,
   overtimePeriods = [],
+  overtimeBreakdown = [],
 }) => {
   // Convert time string to percentage for positioning
   const timeToPercentage = (time: string) => {
@@ -186,7 +192,7 @@ const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
       </div>
 
       {/* Calculation Summary */}
-      <div className="mt-20 pt-14 border-t border-slate-200">
+      <div className="mt-20 pt-14 border-t border-slate-200 flex gap-5">
         {/* <h4 className="text-lg font-semibold text-slate-800 mb-4">
           Daily Summary
         </h4> */}
@@ -249,6 +255,45 @@ const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
             </span>
           </div> */}
         </div>
+
+        {/* Overtime Breakdown */}
+        {overtimeBreakdown &&
+          overtimeBreakdown.length > 0 &&
+          (() => {
+            const totalOvertime = overtimeBreakdown.reduce(
+              (sum, seg) => sum + seg.duration,
+              0
+            );
+            return (
+              <div className="flex flex-col gap-2 bg-neutral-50 p-4 w-max rounded-lg">
+                <h4 className="text-lg font-semibold text-slate-800">
+                  Overtime Breakdown
+                </h4>
+                <div className="flex flex-col gap-2 text-sm">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-medium">Total Overtime:</span>
+                    <span>
+                      {Math.floor(totalOvertime / 60)
+                        .toString()
+                        .padStart(2, "0")}
+                      :{(totalOvertime % 60).toString().padStart(2, "0")}
+                    </span>
+                  </div>
+                  {overtimeBreakdown.map((breakdown, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between gap-2"
+                    >
+                      <span className="font-medium">
+                        {breakdown.multiplier}x Overtime:
+                      </span>
+                      <span>{breakdown.durationHHMM}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
       </div>
 
       {/* Legend */}
