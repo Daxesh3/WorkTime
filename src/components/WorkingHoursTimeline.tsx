@@ -190,61 +190,61 @@ const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
         {/* <h4 className="text-lg font-semibold text-slate-800 mb-4">
           Daily Summary
         </h4> */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-3 text-sm">
-          <div className="flex flex-col">
-            <span className="font-medium text-neutral-700">Total time:</span>
-            <span className="text-neutral-900 mt-1">
+        <div className="flex flex-col gap-2 bg-neutral-50 p-4 w-max rounded-lg">
+          <div className="flex gap-2 justify-between">
+            <span className="text-neutral-700">Total time:</span>
+            <span className="font-medium text-neutral-900 ">
               {calculation.totalTime}
             </span>
           </div>
-          <div className="flex flex-col">
-            <span className="font-medium text-neutral-700">Lunch time:</span>
-            <span className="text-neutral-900 mt-1">
+          <div className="flex gap-2 justify-between">
+            <span className="text-neutral-700">Lunch time:</span>
+            <span className="font-medium text-neutral-900 ">
               {calculation.lunchTime}
             </span>
           </div>
-          <div className="flex flex-col">
-            <span className="font-medium text-neutral-700">Taken breaks:</span>
-            <span className="text-neutral-900 mt-1">
+          <div className="flex gap-2 justify-between">
+            <span className="text-neutral-700">Taken breaks:</span>
+            <span className="font-medium text-neutral-900 ">
               {calculation.takenLunchTime}
             </span>
           </div>
-          <div className="flex flex-col">
-            <span className="font-medium text-neutral-700">Actual hours:</span>
-            <span className="text-neutral-900 mt-1">
+          <div className="flex gap-2 justify-between">
+            <span className="text-neutral-700">Actual hours:</span>
+            <span className="font-medium text-neutral-900 ">
               {calculation.actualWorking}
             </span>
           </div>
-          <div className="flex flex-col">
-            <span className="font-medium text-neutral-700">
-              Required hours:
-            </span>
-            <span className="text-neutral-900 mt-1">
+          <div className="flex gap-2 justify-between">
+            <span className="text-neutral-700">Required hours:</span>
+            <span className="font-medium text-neutral-900 ">
               {calculation.required}
             </span>
           </div>
 
-          {/* <div className="flex flex-col">
-            <span className="font-medium text-neutral-700">Min lunch:</span>
-            <span className="text-neutral-900 mt-1">
+          {/* <div className="flex gap-2 justify-between">
+            <span className="text-neutral-700">Min lunch:</span>
+            <span className="font-medium text-neutral-900 ">
               {calculation.minBreak}
             </span>
           </div> */}
-          <div className="flex flex-col">
-            <span className="font-medium text-neutral-700">Flex hours:</span>
-            <span className="text-neutral-900 mt-1">
+          <div className="flex gap-2 justify-between">
+            <span className="text-neutral-700">Flex hours:</span>
+            <span className="font-medium text-neutral-900 ">
               {calculation.flexHours}
             </span>
           </div>
 
-          <div className="flex flex-col">
-            <span className="font-medium text-neutral-700">Flex bank:</span>
-            <span className="text-neutral-900 mt-1">{calculation.flex}</span>
+          <div className="flex gap-2 justify-between">
+            <span className="text-neutral-700">Flex bank:</span>
+            <span className="font-medium text-neutral-900 ">
+              {calculation.flex}
+            </span>
           </div>
 
-          {/* <div className="flex flex-col">
-            <span className="font-medium text-neutral-700">Taken breaks:</span>
-            <span className="text-neutral-900 mt-1">
+          {/* <div className="flex gap-2 justify-between">
+            <span className="text-neutral-700">Taken breaks:</span>
+            <span className="font-medium text-neutral-900 ">
               {calculation.takenLunchTime}
             </span>
           </div> */}
