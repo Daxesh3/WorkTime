@@ -73,6 +73,8 @@ const AddEditEmployee: React.FC<AddEditEmployeeProps> = ({
         parameters.lunchBreak.duration
       ),
       breaks: [],
+      overtimeStart: "",
+      overtimeEnd: "",
     }),
     [parameters, editingDateId]
   );
@@ -238,6 +240,21 @@ const AddEditEmployee: React.FC<AddEditEmployeeProps> = ({
                 label="Clock Out"
                 value={newRecord.clockOut}
                 onChange={(value) => handleFieldChange("clockOut", value)}
+              />
+            </div>
+            {/* Overtime Fields */}
+            <div className="grid grid-cols-2 gap-3">
+              <TimePicker
+                className="w-full"
+                label="Overtime Start Time (optional)"
+                value={newRecord.overtimeStart || ""}
+                onChange={(value) => handleFieldChange("overtimeStart", value)}
+              />
+              <TimePicker
+                className="w-full"
+                label="Overtime End Time (optional)"
+                value={newRecord.overtimeEnd || ""}
+                onChange={(value) => handleFieldChange("overtimeEnd", value)}
               />
             </div>
           </div>

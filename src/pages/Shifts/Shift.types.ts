@@ -24,6 +24,12 @@ export interface ShiftTiming {
     countTowardsTotal: boolean;
     overtimeMultiplier: number;
   };
+  overtime?: {
+    freeOvertimeDuration: string;
+    nextOvertimeDuration: string;
+    nextOvertimeMultiplier: number;
+    beyondOvertimeMultiplier: number;
+  };
 }
 
 export interface ShiftManagementProps {
