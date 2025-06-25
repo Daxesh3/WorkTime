@@ -141,6 +141,12 @@ const defaultShift: ShiftTiming = {
     countTowardsTotal: true,
     overtimeMultiplier: 1.5,
   },
+  overtime: {
+    freeOvertimeDuration: "00:30",
+    nextOvertimeDuration: "02:00",
+    nextOvertimeMultiplier: 1.5,
+    beyondOvertimeMultiplier: 2.0,
+  },
 };
 
 const Table_Cells: ITableCell[] = [

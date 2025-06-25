@@ -25,6 +25,10 @@ export const defaultParameters: ShiftTiming = {
     flexWindowStart: "11:30",
     flexWindowEnd: "13:30",
   },
+  shiftBonus: {
+    isShiftBonus: false,
+    bonusAmount: 0,
+  },
   earlyArrival: {
     maxMinutes: 30,
     countTowardsTotal: true,
@@ -33,6 +37,12 @@ export const defaultParameters: ShiftTiming = {
     maxMinutes: 30,
     countTowardsTotal: true,
     overtimeMultiplier: 1.5,
+  },
+  overtime: {
+    freeOvertimeDuration: "00:30",
+    nextOvertimeDuration: "02:00",
+    nextOvertimeMultiplier: 1.5,
+    beyondOvertimeMultiplier: 2.0,
   },
 };
 

@@ -76,7 +76,6 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
     if (user && shiftParameters) {
       setSimulationRecord(user);
       const result = simulateCalculation(user, shiftParameters);
-      console.log(" result:", result);
       setCalculationResult(result);
     }
   }, [user, shiftParameters, simulateCalculation]);
@@ -387,12 +386,14 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
                     { start: user.lunchStart, end: user.lunchEnd },
                     ...(user.breaks || []),
                   ];
+
                   const segments = calculateOvertimeSegments({
                     overtimeStart: user.overtimeStart,
                     overtimeEnd: user.overtimeEnd,
                     breaks,
                     shift: shiftParameters,
                   });
+
                   // Map segments to timeline periods
                   let current = user.overtimeStart;
                   return segments.map((seg) => {
