@@ -154,12 +154,39 @@ const EmployeeStampCreator: React.FC<EmployeeStampCreatorProps> = ({
             ))}
           </div>
         </div>
-        <div>
+        {/* <div>
           <label className="input-label">Stamp Time</label>
           <input
             type="datetime-local"
             value={stampTime}
             onChange={(e) => setStampTime(e.target.value)}
+            className="time-input w-full"
+            required
+          />
+        </div> */}
+
+        <div>
+          <label className="input-label">Stamp Date</label>
+          <input
+            type="date"
+            value={stampTime.split("T")[0]} // Extract the date part
+            onChange={(e) => {
+              const [time] = stampTime.split("T")[1]?.split(":") || ["00:00"];
+              setStampTime(`${e.target.value}T${time}`);
+            }}
+            className="time-input w-full"
+            required
+          />
+        </div>
+        <div>
+          <label className="input-label">Stamp Time</label>
+          <input
+            type="time"
+            value={stampTime.split("T")[1]} // Extract the time part
+            onChange={(e) => {
+              const date = stampTime.split("T")[0];
+              setStampTime(`${date}T${e.target.value}`);
+            }}
             className="time-input w-full"
             required
           />
