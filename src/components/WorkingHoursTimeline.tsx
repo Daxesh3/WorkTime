@@ -17,6 +17,7 @@ interface WorkingHoursTimelineProps {
     dailyFlexTimeChangeDirection: "added" | "removed" | undefined;
     flexHours: string | undefined;
   };
+  overtimePeriods?: { start: string; end: string; multiplier: number }[];
 }
 
 const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
@@ -25,6 +26,7 @@ const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
   workingPeriods,
   lunchPeriod,
   calculation,
+  overtimePeriods = [],
 }) => {
   // Convert time string to percentage for positioning
   const timeToPercentage = (time: string) => {
@@ -40,6 +42,13 @@ const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
     const startTotalMinutes = startHours * 60 + startMinutes;
     const endTotalMinutes = endHours * 60 + endMinutes;
     return ((endTotalMinutes - startTotalMinutes) / 60).toFixed(1);
+  };
+
+  // Overtime color mapping
+  const overtimeColors: Record<number, string> = {
+    1: "from-yellow-400 to-yellow-500",
+    1.5: "from-orange-400 to-orange-500",
+    2: "from-red-500 to-red-700",
   };
 
   return (
@@ -145,6 +154,35 @@ const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
             </div>
           </div>
         </div>
+        {/* Overtime Periods */}
+        {overtimePeriods.map((period, idx) => (
+          <div
+            key={idx}
+            className={`absolute top-0 h-2 bg-gradient-to-r ${
+              overtimeColors[period.multiplier] || "from-gray-400 to-gray-500"
+            } rounded-full shadow-md group`}
+            style={{
+              left: `${timeToPercentage(period.start)}%`,
+              width: `${
+                timeToPercentage(period.end) - timeToPercentage(period.start)
+              }%`,
+              zIndex: 2,
+              opacity: 0.85,
+            }}
+          >
+            {/* Overtime Label */}
+            <div className="hidden group-hover:block absolute top-8 left-1/2 -translate-x-1/2 w-max z-[2]">
+              <div className="bg-white border border-yellow-200 rounded-xl p-3 shadow-lg">
+                <div className="text-sm font-semibold text-yellow-700">
+                  Overtime @{period.multiplier}x
+                </div>
+                <div className="text-xs text-yellow-600">
+                  {period.start} to {period.end}
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Calculation Summary */}
@@ -227,6 +265,18 @@ const WorkingHoursTimeline: React.FC<WorkingHoursTimelineProps> = ({
           <div className="flex items-center gap-2">
             <div className="w-4 h-2 bg-gradient-to-r from-rose-400 to-rose-500 rounded-full"></div>
             <span className="text-slate-700">Lunch Break</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-2 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full"></div>
+            <span className="text-slate-700">Overtime @ 1x</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-2 bg-gradient-to-r from-orange-400 to-orange-500 rounded-full"></div>
+            <span className="text-slate-700">Overtime @ 1.5x</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-2 bg-gradient-to-r from-red-500 to-red-700 rounded-full"></div>
+            <span className="text-slate-700">Overtime @ 2x</span>
           </div>
         </div>
       </div>

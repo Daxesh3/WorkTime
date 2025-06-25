@@ -108,6 +108,8 @@ export interface EmployeeRecord {
   breaks: Break[]; // List of additional breaks (this now refers to the other Break interface)
   dateId?: string | null;
   flexBank?: number; // Flex bank in minutes
+  overtimeStart?: string; // Overtime start time in HH:mm format (optional)
+  overtimeEnd?: string; // Overtime end time in HH:mm format (optional)
 }
 
 export interface Break {

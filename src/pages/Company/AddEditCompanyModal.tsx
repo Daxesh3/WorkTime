@@ -25,6 +25,10 @@ export const defaultParameters: ShiftTiming = {
     flexWindowStart: "11:30",
     flexWindowEnd: "13:30",
   },
+  shiftBonus: {
+    isShiftBonus: false,
+    bonusAmount: 0,
+  },
   earlyArrival: {
     maxMinutes: 30,
     countTowardsTotal: true,
@@ -33,6 +37,12 @@ export const defaultParameters: ShiftTiming = {
     maxMinutes: 30,
     countTowardsTotal: true,
     overtimeMultiplier: 1.5,
+  },
+  overtime: {
+    freeOvertimeDuration: "00:30",
+    nextOvertimeDuration: "02:00",
+    nextOvertimeMultiplier: 1.5,
+    beyondOvertimeMultiplier: 2.0,
   },
 };
 
@@ -361,6 +371,80 @@ const AddEditCompanyModal: React.FC<AddEditCompanyModalProps> = ({
                       </li>
                     </ul>
                   </div>
+                </div>
+              </div>
+            </Card>
+
+            <Card
+              title="Overtime Configuration"
+              icon={<FiAlertCircle size={20} />}
+            >
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="input-label">
+                    Free Overtime Duration (HH:MM)
+                  </label>
+                  <TimePicker
+                    value={parameters.overtime?.freeOvertimeDuration || "00:30"}
+                    onChange={(value) =>
+                      handleParameterChange("overtime", {
+                        ...parameters.overtime,
+                        freeOvertimeDuration: value,
+                      })
+                    }
+                    className="w-full"
+                  />
+                </div>
+                <div>
+                  <label className="input-label">
+                    Next Overtime Duration (HH:MM)
+                  </label>
+                  <TimePicker
+                    value={parameters.overtime?.nextOvertimeDuration || "02:00"}
+                    onChange={(value) =>
+                      handleParameterChange("overtime", {
+                        ...parameters.overtime,
+                        nextOvertimeDuration: value,
+                      })
+                    }
+                    className="w-full"
+                  />
+                </div>
+                <div>
+                  <label className="input-label">
+                    Next Overtime Multiplier
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    step="0.1"
+                    value={parameters.overtime?.nextOvertimeMultiplier || 1.5}
+                    onChange={(e) =>
+                      handleParameterChange("overtime", {
+                        ...parameters.overtime,
+                        nextOvertimeMultiplier: parseFloat(e.target.value),
+                      })
+                    }
+                    className="time-input w-full"
+                  />
+                </div>
+                <div>
+                  <label className="input-label">
+                    Beyond Overtime Multiplier
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    step="0.1"
+                    value={parameters.overtime?.beyondOvertimeMultiplier || 2.0}
+                    onChange={(e) =>
+                      handleParameterChange("overtime", {
+                        ...parameters.overtime,
+                        beyondOvertimeMultiplier: parseFloat(e.target.value),
+                      })
+                    }
+                    className="time-input w-full"
+                  />
                 </div>
               </div>
             </Card>

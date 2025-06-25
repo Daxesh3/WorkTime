@@ -19,6 +19,7 @@ import { EmployeeRecord } from "../../shared/types";
 import { calculateFlexBank } from "../../utils/flexBank";
 import { calculateDailyData, minutesToHHMM } from "../../utils/weeklySummary";
 import { DailyRecord } from "../../components/ui/WeeklyBreakdownModal";
+import { calculateOvertimeSegments } from "../../utils/overtime";
 
 interface IProps {
   isOpen: boolean;
@@ -75,7 +76,6 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
     if (user && shiftParameters) {
       setSimulationRecord(user);
       const result = simulateCalculation(user, shiftParameters);
-      console.log(" result:", result);
       setCalculationResult(result);
     }
   }, [user, shiftParameters, simulateCalculation]);
@@ -375,9 +375,98 @@ const EmployeeDetailsModal: React.FC<IProps> = ({
                 dailyFlexTimeChangeDirection:
                   dailySummary?.dailyFlexTimeChangeDirection,
               }}
+              overtimePeriods={(() => {
+                if (
+                  user?.overtimeStart &&
+                  user?.overtimeEnd &&
+                  shiftParameters?.overtime
+                ) {
+                  // Combine lunch and additional breaks
+                  const breaks = [
+                    { start: user.lunchStart, end: user.lunchEnd },
+                    ...(user.breaks || []),
+                  ];
+
+                  const segments = calculateOvertimeSegments({
+                    overtimeStart: user.overtimeStart,
+                    overtimeEnd: user.overtimeEnd,
+                    breaks,
+                    shift: shiftParameters,
+                  });
+
+                  // Map segments to timeline periods
+                  let current = user.overtimeStart;
+                  return segments.map((seg) => {
+                    const period = {
+                      start: current,
+                      end: (() => {
+                        const mins =
+                          parseInt(current.split(":")[0]) * 60 +
+                          parseInt(current.split(":")[1]) +
+                          seg.duration;
+                        const h = Math.floor(mins / 60)
+                          .toString()
+                          .padStart(2, "0");
+                        const m = (mins % 60).toString().padStart(2, "0");
+                        return `${h}:${m}`;
+                      })(),
+                      multiplier: seg.multiplier,
+                    };
+                    current = period.end;
+                    return period;
+                  });
+                }
+                return [];
+              })()}
             />
           </Card>
         )}
+        {/* Overtime Breakdown Card (separate) */}
+        {user?.overtimeStart &&
+          user?.overtimeEnd &&
+          shiftParameters?.overtime &&
+          (() => {
+            const breaks = [
+              { start: user.lunchStart, end: user.lunchEnd },
+              ...(user.breaks || []),
+            ];
+            const segments = calculateOvertimeSegments({
+              overtimeStart: user.overtimeStart,
+              overtimeEnd: user.overtimeEnd,
+              breaks,
+              shift: shiftParameters,
+            });
+            if (!segments.length) return null;
+            const totalOvertime = segments.reduce(
+              (sum, seg) => sum + seg.duration,
+              0
+            );
+            return (
+              <Card
+                className="mt-4"
+                title="Overtime Breakdown"
+                icon={<FaClock size={20} className="text-yellow-600" />}
+              >
+                <div className="flex flex-wrap gap-4 text-sm">
+                  <div>
+                    <span className="font-medium">Total Overtime:</span>{" "}
+                    {Math.floor(totalOvertime / 60)
+                      .toString()
+                      .padStart(2, "0")}
+                    :{(totalOvertime % 60).toString().padStart(2, "0")}
+                  </div>
+                  {segments.map((seg, idx) => (
+                    <div key={idx}>
+                      <span className="font-medium">
+                        {seg.multiplier}x Overtime:
+                      </span>{" "}
+                      {seg.durationHHMM}
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            );
+          })()}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">

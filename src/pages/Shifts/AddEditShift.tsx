@@ -1,5 +1,5 @@
 import React from "react";
-import { FiSun, FiCoffee, FiClock } from "react-icons/fi";
+import { FiSun, FiCoffee, FiClock, FiAlertCircle } from "react-icons/fi";
 import { GiMoneyStack } from "react-icons/gi";
 
 import Modal from "../../components/ui/Modal";
@@ -30,6 +30,14 @@ const AddEditShift: React.FC<AddEditCompanyModalProps> = ({
   ) => {
     setEditingShift((prev) => {
       if (!prev) return null;
+
+      // Special handling for overtime object
+      if (field === "overtime") {
+        return {
+          ...prev,
+          overtime: value,
+        };
+      }
 
       if (subField && typeof prev[field] === "object") {
         return {
@@ -189,6 +197,73 @@ const AddEditShift: React.FC<AddEditCompanyModalProps> = ({
           </div>
         </Card>
 
+        <Card title="Overtime Configuration" icon={<FiAlertCircle size={20} />}>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="input-label">
+                Free Overtime Duration (HH:MM)
+              </label>
+              <TimePicker
+                value={editingShift?.overtime?.freeOvertimeDuration || "00:30"}
+                onChange={(value) =>
+                  updateEditingShift("overtime", {
+                    ...editingShift?.overtime,
+                    freeOvertimeDuration: value,
+                  })
+                }
+                className="w-full"
+              />
+            </div>
+            <div>
+              <label className="input-label">
+                Next Overtime Duration (HH:MM)
+              </label>
+              <TimePicker
+                value={editingShift?.overtime?.nextOvertimeDuration || "02:00"}
+                onChange={(value) =>
+                  updateEditingShift("overtime", {
+                    ...editingShift?.overtime,
+                    nextOvertimeDuration: value,
+                  })
+                }
+                className="w-full"
+              />
+            </div>
+            <div>
+              <label className="input-label">Next Overtime Multiplier</label>
+              <input
+                type="number"
+                min="1"
+                step="0.1"
+                value={editingShift?.overtime?.nextOvertimeMultiplier || 1.5}
+                onChange={(e) =>
+                  updateEditingShift("overtime", {
+                    ...editingShift?.overtime,
+                    nextOvertimeMultiplier: parseFloat(e.target.value),
+                  })
+                }
+                className="time-input w-full"
+              />
+            </div>
+            <div>
+              <label className="input-label">Beyond Overtime Multiplier</label>
+              <input
+                type="number"
+                min="1"
+                step="0.1"
+                value={editingShift?.overtime?.beyondOvertimeMultiplier || 2.0}
+                onChange={(e) =>
+                  updateEditingShift("overtime", {
+                    ...editingShift?.overtime,
+                    beyondOvertimeMultiplier: parseFloat(e.target.value),
+                  })
+                }
+                className="time-input w-full"
+              />
+            </div>
+          </div>
+        </Card>
+
         <Card title="Flex Policies" icon={<FiSun />}>
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-4">
@@ -297,6 +372,12 @@ let defaultData = {
   hourly: {
     start: "09:00",
     end: "10:00",
+    overtime: {
+      freeOvertimeDuration: "00:30",
+      nextOvertimeDuration: "02:00",
+      nextOvertimeMultiplier: 1.5,
+      beyondOvertimeMultiplier: 2.0,
+    },
   },
   morning: {
     start: "06:00",
@@ -306,6 +387,12 @@ let defaultData = {
       duration: 60,
       flexWindowStart: "11:30",
       flexWindowEnd: "13:30",
+    },
+    overtime: {
+      freeOvertimeDuration: "00:30",
+      nextOvertimeDuration: "02:00",
+      nextOvertimeMultiplier: 1.5,
+      beyondOvertimeMultiplier: 2.0,
     },
   },
   evening: {
@@ -317,6 +404,12 @@ let defaultData = {
       flexWindowStart: "17:30",
       flexWindowEnd: "19:30",
     },
+    overtime: {
+      freeOvertimeDuration: "00:30",
+      nextOvertimeDuration: "02:00",
+      nextOvertimeMultiplier: 1.5,
+      beyondOvertimeMultiplier: 2.0,
+    },
   },
   night: {
     start: "22:00",
@@ -326,6 +419,12 @@ let defaultData = {
       duration: 60,
       flexWindowStart: "01:30",
       flexWindowEnd: "03:30",
+    },
+    overtime: {
+      freeOvertimeDuration: "00:30",
+      nextOvertimeDuration: "02:00",
+      nextOvertimeMultiplier: 1.5,
+      beyondOvertimeMultiplier: 2.0,
     },
   },
 };

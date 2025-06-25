@@ -150,11 +150,7 @@ const useWorkTimeStore = create<WorkTimeStore>()(
         let effectiveStart = clockIn;
         if (clockIn < workStart) {
           const earlyByMinutes = differenceInMinutes(workStart, clockIn);
-          console.log(
-            "earlyByMinutes",
-            earlyByMinutes > shift.earlyArrival.maxMinutes,
-            shift.earlyArrival.countTowardsTotal
-          );
+
           if (
             earlyByMinutes > shift.earlyArrival.maxMinutes ||
             !shift.earlyArrival.countTowardsTotal
