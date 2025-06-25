@@ -31,6 +31,14 @@ const AddEditShift: React.FC<AddEditCompanyModalProps> = ({
     setEditingShift((prev) => {
       if (!prev) return null;
 
+      // Special handling for overtime object
+      if (field === "overtime") {
+        return {
+          ...prev,
+          overtime: value,
+        };
+      }
+
       if (subField && typeof prev[field] === "object") {
         return {
           ...prev,
@@ -364,6 +372,12 @@ let defaultData = {
   hourly: {
     start: "09:00",
     end: "10:00",
+    overtime: {
+      freeOvertimeDuration: "00:30",
+      nextOvertimeDuration: "02:00",
+      nextOvertimeMultiplier: 1.5,
+      beyondOvertimeMultiplier: 2.0,
+    },
   },
   morning: {
     start: "06:00",
@@ -373,6 +387,12 @@ let defaultData = {
       duration: 60,
       flexWindowStart: "11:30",
       flexWindowEnd: "13:30",
+    },
+    overtime: {
+      freeOvertimeDuration: "00:30",
+      nextOvertimeDuration: "02:00",
+      nextOvertimeMultiplier: 1.5,
+      beyondOvertimeMultiplier: 2.0,
     },
   },
   evening: {
@@ -384,6 +404,12 @@ let defaultData = {
       flexWindowStart: "17:30",
       flexWindowEnd: "19:30",
     },
+    overtime: {
+      freeOvertimeDuration: "00:30",
+      nextOvertimeDuration: "02:00",
+      nextOvertimeMultiplier: 1.5,
+      beyondOvertimeMultiplier: 2.0,
+    },
   },
   night: {
     start: "22:00",
@@ -393,6 +419,12 @@ let defaultData = {
       duration: 60,
       flexWindowStart: "01:30",
       flexWindowEnd: "03:30",
+    },
+    overtime: {
+      freeOvertimeDuration: "00:30",
+      nextOvertimeDuration: "02:00",
+      nextOvertimeMultiplier: 1.5,
+      beyondOvertimeMultiplier: 2.0,
     },
   },
 };

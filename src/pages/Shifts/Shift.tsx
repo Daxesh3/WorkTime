@@ -33,6 +33,8 @@ const ShiftManagement: React.FC<ShiftManagementProps> = ({
   const handleSaveShift = async () => {
     if (!editingShift) return;
 
+    console.log("Saving shift with overtime config:", editingShift);
+
     setLoading(true);
     try {
       if ("id" in editingShift) {

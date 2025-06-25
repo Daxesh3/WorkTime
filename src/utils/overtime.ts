@@ -29,11 +29,26 @@ export function calculateOvertimeSegments({
   breaks: { start: string; end: string }[];
   shift: ShiftTiming;
 }): OvertimeSegment[] {
-  if (!shift.overtime) return [];
+  console.log("calculateOvertimeSegments input:", {
+    overtimeStart,
+    overtimeEnd,
+    breaks,
+    shiftOvertime: shift.overtime,
+  });
+
+  if (!shift.overtime) {
+    console.log("No overtime config found, returning empty array");
+    return [];
+  }
+
   const overtimeConfig = shift.overtime;
+  console.log("Overtime config:", overtimeConfig);
+
   let start = timeToMinutes(overtimeStart);
   let end = timeToMinutes(overtimeEnd);
   let total = end - start;
+
+  console.log("Total overtime minutes before breaks:", total);
 
   // Subtract break time within overtime
   for (const br of breaks) {
@@ -43,12 +58,25 @@ export function calculateOvertimeSegments({
     const overlapStart = Math.max(start, bStart);
     const overlapEnd = Math.min(end, bEnd);
     if (overlapStart < overlapEnd) {
-      total -= overlapEnd - overlapStart;
+      const breakOverlap = overlapEnd - overlapStart;
+      total -= breakOverlap;
+      console.log(
+        `Break ${br.start}-${br.end} overlaps overtime by ${breakOverlap} minutes`
+      );
     }
   }
 
+  console.log("Total overtime minutes after breaks:", total);
+
   const free = timeToMinutes(overtimeConfig.freeOvertimeDuration);
   const next = timeToMinutes(overtimeConfig.nextOvertimeDuration);
+
+  console.log("Overtime thresholds:", {
+    free,
+    next,
+    nextMultiplier: overtimeConfig.nextOvertimeMultiplier,
+    beyondMultiplier: overtimeConfig.beyondOvertimeMultiplier,
+  });
 
   let segments: OvertimeSegment[] = [];
   if (total > 0) {
@@ -87,5 +115,7 @@ export function calculateOvertimeSegments({
       });
     }
   }
+
+  console.log("Final segments:", segments);
   return segments;
 }
